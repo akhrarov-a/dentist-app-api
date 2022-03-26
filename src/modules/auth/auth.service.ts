@@ -1,9 +1,15 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { SignUpCredentialsDto } from './dto';
+import { SignInCredentialsDto, SignUpCredentialsDto } from './dto';
+import { JwtPayload } from './types';
 import { User } from './user.entity';
 
 /**
@@ -14,6 +20,7 @@ class AuthService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private config: ConfigService,
   ) {}
 
   /**
@@ -61,6 +68,36 @@ class AuthService {
     user.role = role;
 
     await user.save();
+  }
+
+  /**
+   * Sign in
+   */
+  async signIn(
+    signInCredentialsDto: SignInCredentialsDto,
+  ): Promise<{ accessToken: string; expires: string }> {
+    const { login, password } = signInCredentialsDto;
+
+    const query = this.userRepository.createQueryBuilder('user');
+
+    query.where(
+      'user.username = :login OR user.phoneNumber = :login OR user.email = :login',
+      { login },
+    );
+
+    const user = await query.getOne();
+
+    if (!(user && (await user.validatePassword(password)))) {
+      throw new UnauthorizedException('Invalid Credentials');
+    }
+
+    const payload: JwtPayload = { username: user.username };
+    const accessToken = this.jwtService.sign(payload);
+
+    return {
+      accessToken,
+      expires: this.config.get<string>('JWT_EXPIRES_IN'),
+    };
   }
 
   /**

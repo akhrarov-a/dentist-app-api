@@ -1,5 +1,5 @@
 import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
-import { SignUpCredentialsDto } from './dto';
+import { SignInCredentialsDto, SignUpCredentialsDto } from './dto';
 import { UserRoleValidationPipe } from './pipes';
 import { UserRole } from './types';
 import { AuthService } from './auth.service';
@@ -20,6 +20,16 @@ class AuthController {
     @Body('role', UserRoleValidationPipe) role: UserRole,
   ): Promise<void> {
     return this.authService.signUp(signUpCredentialsDto);
+  }
+
+  /**
+   * Sign in
+   */
+  @Post('/signin')
+  signIn(
+    @Body(ValidationPipe) signInCredentialsDto: SignInCredentialsDto,
+  ): Promise<{ accessToken: string; expires: string }> {
+    return this.authService.signIn(signInCredentialsDto);
   }
 }
 
