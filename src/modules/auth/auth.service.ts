@@ -8,9 +8,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
+import { User } from '@user';
 import { SignInCredentialsDto, SignUpCredentialsDto } from './dto';
-import { JwtPayload } from './types';
-import { User } from './user.entity';
+import { JwtPayload, UserToReturn } from './types';
 
 /**
  * Auth Service
@@ -97,6 +97,30 @@ class AuthService {
     return {
       accessToken,
       expires: this.config.get<string>('JWT_EXPIRES_IN'),
+    };
+  }
+
+  /**
+   * Get me
+   */
+  async getMe(token: string): Promise<{ user: UserToReturn }> {
+    const jwtPayload: any = await this.jwtService.decode(token);
+
+    const { id, email, username, first_name, last_name, phoneNumber, role } =
+      await this.userRepository.findOne({
+        where: { username: jwtPayload?.username },
+      });
+
+    return {
+      user: {
+        id,
+        email,
+        firstname: first_name,
+        lastname: last_name,
+        username,
+        phoneNumber,
+        role,
+      },
     };
   }
 

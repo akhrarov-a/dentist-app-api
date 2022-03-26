@@ -8,7 +8,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { UserRole } from '@auth/types';
+import { UserRole } from '@user';
 
 /**
  * Sign up credentials dto

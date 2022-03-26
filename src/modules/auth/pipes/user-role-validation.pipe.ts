@@ -1,5 +1,5 @@
 import { BadRequestException, PipeTransform } from '@nestjs/common';
-import { UserRole } from '@auth/types';
+import { UserRole } from '@user';
 
 /**
  * User role validation pipe

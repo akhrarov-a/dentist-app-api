@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from './shared/typeorm';
 import { AuthModule } from '@auth';
+import { UserModule } from '@user';
 
 /**
  * App Module
@@ -12,6 +13,7 @@ import { AuthModule } from '@auth';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
     AuthModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],

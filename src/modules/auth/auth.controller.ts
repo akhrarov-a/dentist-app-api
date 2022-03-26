@@ -1,8 +1,18 @@
-import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  UseGuards,
+  ValidationPipe,
+} from '@nestjs/common';
+import { UserRole } from '@user';
 import { SignInCredentialsDto, SignUpCredentialsDto } from './dto';
 import { UserRoleValidationPipe } from './pipes';
-import { UserRole } from './types';
+import { UserToReturn } from './types';
 import { AuthService } from './auth.service';
+import { AuthGuard } from '@nestjs/passport';
 
 /**
  * Auth Controller
@@ -30,6 +40,17 @@ class AuthController {
     @Body(ValidationPipe) signInCredentialsDto: SignInCredentialsDto,
   ): Promise<{ accessToken: string; expires: string }> {
     return this.authService.signIn(signInCredentialsDto);
+  }
+
+  /**
+   * Get me
+   */
+  @Get('/me')
+  @UseGuards(AuthGuard())
+  getMe(@Req() req): Promise<{ user: UserToReturn }> {
+    const token = req.headers.authorization.replace('Bearer ', '');
+
+    return this.authService.getMe(token);
   }
 }
 

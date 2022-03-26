@@ -1,2 +1,2 @@
 export * from './auth.module';
-export * from './user.entity';
+export * from './jwt.strategy';
