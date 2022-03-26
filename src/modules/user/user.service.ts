@@ -108,6 +108,17 @@ class UserService {
   }
 
   /**
+   * Delete user by id
+   */
+  async deleteUserById(id: number): Promise<void> {
+    const result = await this.userRepository.delete({ id });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+  }
+
+  /**
    * Hash password
    */
   async hashPassword(password: string, salt: string): Promise<string> {

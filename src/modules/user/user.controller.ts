@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -53,6 +54,14 @@ class UserController {
     @Body('role', UserRoleValidationPipe) role: UserRole,
   ): Promise<{ user: UserToReturn }> {
     return this.userService.updateUserInfo(id, body);
+  }
+
+  /**
+   * Delete user by id
+   */
+  @Delete('/:id')
+  deleteUserById(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.userService.deleteUserById(id);
   }
 }
 
