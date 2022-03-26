@@ -13,7 +13,7 @@ import { UserRole } from './types';
  * User
  */
 @Entity()
-@Unique(['username', 'phoneNumber', 'email'])
+@Unique(['username', 'phone_number', 'email'])
 class User extends BaseEntity {
   /**
    * Id
@@ -49,7 +49,7 @@ class User extends BaseEntity {
    * Phone number
    */
   @Column()
-  phoneNumber: string;
+  phone_number: string;
 
   /**
    * Salt

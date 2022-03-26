@@ -8,9 +8,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { User } from '@user';
+import { User, UserToReturn } from '@user';
 import { SignInCredentialsDto, SignUpCredentialsDto } from './dto';
-import { JwtPayload, UserToReturn } from './types';
+import { JwtPayload } from './types';
 
 /**
  * Auth Service
@@ -38,7 +38,7 @@ class AuthService {
     } = signUpCredentialsDto;
 
     const existsPhoneNumber = await this.userRepository.findOne({
-      where: { phoneNumber },
+      where: { phone_number: phoneNumber },
     });
     if (existsPhoneNumber) {
       throw new ConflictException('User with this phone number already exists');
@@ -63,7 +63,7 @@ class AuthService {
     user.username = username;
     user.salt = await bcrypt.genSalt();
     user.password = await this.hashPassword(password, user.salt);
-    user.phoneNumber = phoneNumber;
+    user.phone_number = phoneNumber;
     user.email = email;
     user.role = role;
 
@@ -81,7 +81,7 @@ class AuthService {
     const query = this.userRepository.createQueryBuilder('user');
 
     query.where(
-      'user.username = :login OR user.phoneNumber = :login OR user.email = :login',
+      'user.username = :login OR user.phone_number = :login OR user.email = :login',
       { login },
     );
 
@@ -106,7 +106,7 @@ class AuthService {
   async getMe(token: string): Promise<{ user: UserToReturn }> {
     const jwtPayload: any = await this.jwtService.decode(token);
 
-    const { id, email, username, first_name, last_name, phoneNumber, role } =
+    const { id, email, username, first_name, last_name, phone_number, role } =
       await this.userRepository.findOne({
         where: { username: jwtPayload?.username },
       });
@@ -118,7 +118,7 @@ class AuthService {
         firstname: first_name,
         lastname: last_name,
         username,
-        phoneNumber,
+        phoneNumber: phone_number,
         role,
       },
     };

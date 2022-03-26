@@ -1,4 +1,4 @@
-import { UserRole } from '@user';
+import { UserRole } from './user-role.enum';
 
 /**
  * User to return

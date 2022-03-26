@@ -7,10 +7,9 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { UserRole } from '@user';
+import { UserRole, UserToReturn } from '@user';
 import { SignInCredentialsDto, SignUpCredentialsDto } from './dto';
 import { UserRoleValidationPipe } from './pipes';
-import { UserToReturn } from './types';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -46,7 +45,7 @@ class AuthController {
    * Get me
    */
   @Get('/me')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard('jwt'))
   getMe(@Req() req): Promise<{ user: UserToReturn }> {
     const token = req.headers.authorization.replace('Bearer ', '');
 
