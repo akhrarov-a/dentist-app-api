@@ -18,7 +18,7 @@ class TypeOrmConfigService implements TypeOrmOptionsFactory {
 
     const options: TypeOrmModuleOptions = {
       type: 'postgres',
-      entities: [__dirname + '/../**/*.entity.js'],
+      entities: [__dirname + '/../../**/*.entity.js'],
       synchronize: isDevelopment,
     };
 
