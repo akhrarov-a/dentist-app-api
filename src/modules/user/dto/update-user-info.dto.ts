@@ -26,6 +26,7 @@ class UpdateUserDto {
   /**
    * First name
    */
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
   firstname: string;
@@ -33,6 +34,7 @@ class UpdateUserDto {
   /**
    * Last name
    */
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
   lastname: string;

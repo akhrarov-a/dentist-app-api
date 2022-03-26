@@ -9,8 +9,9 @@ class AdminGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    console.log(context);
-    return true;
+    const request = context.switchToHttp().getRequest();
+
+    return request.user?.role === 'admin';
   }
 }
 
