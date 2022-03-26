@@ -17,10 +17,12 @@ import { DentistGuard } from '@core';
 import { AddPatientDto, GetPatientsFilterDto, UpdatePatientDto } from './dto';
 import { Patient } from './patient.entity';
 import { PatientService } from './patient.service';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 /**
  * Patient Controller
  */
+@ApiTags('parents')
 @Controller('patients')
 @UseGuards(AuthGuard('jwt'), DentistGuard)
 class PatientController {
@@ -29,6 +31,11 @@ class PatientController {
   /**
    * Get patients
    */
+  @ApiOperation({
+    summary: 'Request for getting patients with pagination and search',
+    description:
+      'If you want to get patients with pagination and search, use this route',
+  })
   @Get()
   getPatients(
     @Query(ValidationPipe) filterDto: GetPatientsFilterDto,
@@ -40,6 +47,10 @@ class PatientController {
   /**
    * Get patient by id
    */
+  @ApiOperation({
+    summary: 'Request for getting patient by id',
+    description: 'If you want to get patient by id, use this route',
+  })
   @Get('/:id')
   getPatientById(
     @Param('id', ParseIntPipe) id: number,
@@ -51,6 +62,10 @@ class PatientController {
   /**
    * Add patient
    */
+  @ApiOperation({
+    summary: 'Request for adding patient',
+    description: 'If you want to add patient, use this route',
+  })
   @Post()
   addPatient(
     @Body(ValidationPipe) addPatientDto: AddPatientDto,
@@ -62,6 +77,10 @@ class PatientController {
   /**
    * Update patient by id
    */
+  @ApiOperation({
+    summary: 'Request for updating patient info by id',
+    description: 'If you want to update patient info by id, use this route',
+  })
   @Patch('/:id')
   updatePatientById(
     @Param('id', ParseIntPipe) id: number,
@@ -74,6 +93,10 @@ class PatientController {
   /**
    * Delete patient by id
    */
+  @ApiOperation({
+    summary: 'Request for deleting patient by id',
+    description: 'If you want to delete patient by id, use this route',
+  })
   @Delete('/:id')
   deletePatientById(
     @Param('id', ParseIntPipe) id: number,

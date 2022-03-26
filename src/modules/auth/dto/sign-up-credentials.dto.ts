@@ -9,6 +9,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { UserRole } from '@user';
+import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * Sign up credentials dto
@@ -17,6 +18,7 @@ class SignUpCredentialsDto {
   /**
    * Username
    */
+  @ApiProperty({ type: 'string', title: 'Username', default: '' })
   @IsString()
   @MinLength(4)
   @MaxLength(20)
@@ -25,6 +27,7 @@ class SignUpCredentialsDto {
   /**
    * Email
    */
+  @ApiProperty({ type: 'string', title: 'Email', default: '' })
   @IsOptional()
   @IsEmail()
   email: string;
@@ -32,6 +35,7 @@ class SignUpCredentialsDto {
   /**
    * Password
    */
+  @ApiProperty({ type: 'string', title: 'Password', default: '' })
   @IsString()
   @MinLength(8)
   @MaxLength(20)
@@ -43,6 +47,7 @@ class SignUpCredentialsDto {
   /**
    * First name
    */
+  @ApiProperty({ type: 'string', title: 'Firstname', default: '' })
   @IsString()
   @IsNotEmpty()
   firstname: string;
@@ -50,6 +55,7 @@ class SignUpCredentialsDto {
   /**
    * Last name
    */
+  @ApiProperty({ type: 'string', title: 'Lastname', default: '' })
   @IsString()
   @IsNotEmpty()
   lastname: string;
@@ -57,6 +63,7 @@ class SignUpCredentialsDto {
   /**
    * Phone number
    */
+  @ApiProperty({ type: 'string', title: 'Phone number', default: '' })
   @IsPhoneNumber()
   @MinLength(13)
   @MaxLength(13)
@@ -65,6 +72,7 @@ class SignUpCredentialsDto {
   /**
    * Role
    */
+  @ApiProperty({ enum: UserRole, title: 'Role', default: UserRole.DENTIST })
   role: UserRole;
 }
 

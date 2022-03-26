@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * Get users filter dto
@@ -7,6 +8,10 @@ class GetUsersFilterDto {
   /**
    * Search
    */
+  @ApiProperty({
+    type: 'string',
+    required: false,
+  })
   @IsOptional()
   @IsNotEmpty()
   search: string;
@@ -14,6 +19,10 @@ class GetUsersFilterDto {
   /**
    * Page
    */
+  @ApiProperty({
+    type: 'number',
+    required: false,
+  })
   @IsOptional()
   @IsNotEmpty()
   page: number;
@@ -21,6 +30,10 @@ class GetUsersFilterDto {
   /**
    * Per page
    */
+  @ApiProperty({
+    type: 'number',
+    required: false,
+  })
   @IsOptional()
   @IsNotEmpty()
   perPage: number;

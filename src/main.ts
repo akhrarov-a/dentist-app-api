@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 /**
  * Bootstrap
@@ -21,6 +22,18 @@ async function bootstrap() {
   }
 
   app.setGlobalPrefix('api/v1');
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Dentist App API')
+    .setDescription('This is API documentation of Dentist App')
+    .setBasePath('https://stomatolog-uz-api.herokuapp.com')
+    .setVersion('v1')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('swagger', app, document, {
+    customSiteTitle: 'Dentist App API',
+  });
 
   const port = parseInt(`${config.get<string>('PORT')}`);
 
