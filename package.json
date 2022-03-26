@@ -1,8 +1,8 @@
 {
-  "name": "dentist-app-api-new",
+  "name": "dentist-app-api",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Dentist App API",
+  "author": "Asadbek Akhrarov",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
