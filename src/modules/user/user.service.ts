@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { paginate } from '@core';
 import { Repository } from 'typeorm';
 import { UserToReturn } from './types';
 import { GetUsersFilterDto } from './dto';
 import { User } from './user.entity';
-import { paginate } from '@core/utils';
 
 /**
  * User Service
@@ -25,8 +25,6 @@ class UserService {
 
     const query = this.userRepository.createQueryBuilder('user');
 
-    let total: number, users: User[];
-
     if (search) {
       await query.andWhere(
         '(user.first_name LIKE :search OR user.last_name LIKE :search OR user.username LIKE :search OR user.phone_number LIKE :search OR user.email LIKE :search)',
@@ -34,20 +32,12 @@ class UserService {
       );
     }
 
-    if (page && perPage) {
-      const result = await paginate(query, page, perPage);
-
-      total = result.total;
-      users = result.data;
-    } else {
-      total = await query.getCount();
-      users = await query.getMany();
-    }
+    const { total, data } = await paginate<User>(query, page, perPage);
 
     const response: { total: number; perPage?: number; users: UserToReturn[] } =
       {
         total,
-        users: users.map(
+        users: data.map(
           ({
             id,
             email,
@@ -69,7 +59,7 @@ class UserService {
       };
 
     if (page && perPage) {
-      response.perPage = perPage;
+      response.perPage = +perPage;
     }
 
     return response;

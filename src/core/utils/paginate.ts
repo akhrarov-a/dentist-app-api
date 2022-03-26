@@ -7,21 +7,25 @@ const paginate = async <T>(
   query: SelectQueryBuilder<T>,
   page: number,
   perPage: number,
-) => {
-  const totalCount = await query.getCount();
+): Promise<{ total: number; data: T[] }> => {
+  if (page && perPage) {
+    const totalCount = await query.getCount();
 
-  const total = Math.floor(
-    Number.isInteger(totalCount / perPage)
-      ? totalCount / perPage
-      : totalCount / perPage + 1,
-  );
+    const skippedItems = (page - 1) * perPage;
 
-  const skippedItems = (page - 1) * perPage;
-  const data = await query.offset(skippedItems).limit(perPage).getMany();
+    return {
+      total: Math.floor(
+        Number.isInteger(totalCount / perPage)
+          ? totalCount / perPage
+          : totalCount / perPage + 1,
+      ),
+      data: await query.offset(skippedItems).limit(perPage).getMany(),
+    };
+  }
 
   return {
-    total,
-    data,
+    total: await query.getCount(),
+    data: await query.getMany(),
   };
 };
 
