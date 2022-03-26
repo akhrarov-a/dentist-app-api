@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { paginate } from '@core';
+import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
 import { UserToReturn } from './types';
-import { GetUsersFilterDto } from './dto';
+import { GetUsersFilterDto, UpdateUserDto } from './dto';
 import { User } from './user.entity';
+import { formatUser } from '@user/utils';
 
 /**
  * User Service
@@ -37,25 +39,7 @@ class UserService {
     const response: { total: number; perPage?: number; users: UserToReturn[] } =
       {
         total,
-        users: data.map(
-          ({
-            id,
-            email,
-            username,
-            first_name,
-            last_name,
-            phone_number,
-            role,
-          }) => ({
-            id,
-            email,
-            username,
-            firstname: first_name,
-            lastname: last_name,
-            phoneNumber: phone_number,
-            role,
-          }),
-        ),
+        users: data.map((user) => formatUser(user)),
       };
 
     if (page && perPage) {
@@ -63,6 +47,71 @@ class UserService {
     }
 
     return response;
+  }
+
+  /**
+   * Get user by id
+   */
+  async getUserById(id: number): Promise<{ user: UserToReturn }> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return {
+      user: formatUser(user),
+    };
+  }
+
+  /**
+   * Update user info
+   */
+  async updateUserInfo(
+    id: number,
+    body: UpdateUserDto,
+  ): Promise<{ user: UserToReturn }> {
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    const {
+      username,
+      password,
+      firstname,
+      lastname,
+      phoneNumber,
+      email,
+      role,
+    } = body;
+
+    user.username = username;
+    user.first_name = firstname;
+    user.last_name = lastname;
+    user.phone_number = phoneNumber;
+    user.email = email;
+    user.role = role;
+
+    if (password) {
+      user.password = await this.hashPassword(password, user.salt);
+    }
+
+    await user.save();
+
+    return {
+      user: formatUser(user),
+    };
+  }
+
+  /**
+   * Hash password
+   */
+  async hashPassword(password: string, salt: string): Promise<string> {
+    return bcrypt.hash(password, salt);
   }
 }
 

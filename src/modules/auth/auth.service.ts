@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { User, UserToReturn } from '@user';
+import { formatUser, User, UserToReturn } from '@user';
 import { SignInCredentialsDto, SignUpCredentialsDto } from './dto';
 import { JwtPayload } from './types';
 
@@ -106,21 +106,12 @@ class AuthService {
   async getMe(token: string): Promise<{ user: UserToReturn }> {
     const jwtPayload: any = await this.jwtService.decode(token);
 
-    const { id, email, username, first_name, last_name, phone_number, role } =
-      await this.userRepository.findOne({
-        where: { username: jwtPayload?.username },
-      });
+    const user = await this.userRepository.findOne({
+      where: { username: jwtPayload?.username },
+    });
 
     return {
-      user: {
-        id,
-        email,
-        firstname: first_name,
-        lastname: last_name,
-        username,
-        phoneNumber: phone_number,
-        role,
-      },
+      user: formatUser(user),
     };
   }
 
