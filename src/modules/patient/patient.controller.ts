@@ -12,16 +12,17 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { GetUser, User } from '@user';
+import { DentistGuard } from '@core';
 import { AddPatientDto, GetPatientsFilterDto, UpdatePatientDto } from './dto';
 import { Patient } from './patient.entity';
 import { PatientService } from './patient.service';
-import { GetUser, User } from '@user';
 
 /**
  * Patient Controller
  */
 @Controller('patients')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'), DentistGuard)
 class PatientController {
   constructor(private patientsService: PatientService) {}
 
