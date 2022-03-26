@@ -58,8 +58,8 @@ class AuthService {
 
     const user = new User();
 
-    user.first_name = firstname;
-    user.last_name = lastname;
+    user.firstname = firstname;
+    user.lastname = lastname;
     user.username = username;
     user.salt = await bcrypt.genSalt();
     user.password = await this.hashPassword(password, user.salt);
@@ -103,11 +103,9 @@ class AuthService {
   /**
    * Get me
    */
-  async getMe(token: string): Promise<{ user: UserToReturn }> {
-    const jwtPayload: any = await this.jwtService.decode(token);
-
+  async getMe(userId: number): Promise<{ user: UserToReturn }> {
     const user = await this.userRepository.findOne({
-      where: { username: jwtPayload?.username },
+      where: { id: userId },
     });
 
     return {

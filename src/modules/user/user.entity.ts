@@ -2,11 +2,12 @@ import {
   BaseEntity,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-// import { Patient } from '../patients/patient.entity';
+import { Patient } from '@patient';
 import { UserRole } from './types';
 
 /**
@@ -34,16 +35,16 @@ class User extends BaseEntity {
   password: string;
 
   /**
-   * First name
+   * Firstname
    */
   @Column()
-  first_name: string;
+  firstname: string;
 
   /**
-   * Last name
+   * Lastname
    */
   @Column()
-  last_name: string;
+  lastname: string;
 
   /**
    * Phone number
@@ -72,8 +73,8 @@ class User extends BaseEntity {
   /**
    * Patients
    */
-  // @OneToMany((type) => Patient, (patient) => patient.user, { eager: true })
-  // patients: Patient[];
+  @OneToMany(() => Patient, (patient) => patient.user, { eager: true })
+  patients: Patient[];
 
   /**
    * Validate password

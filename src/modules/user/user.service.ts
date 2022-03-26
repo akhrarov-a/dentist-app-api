@@ -5,8 +5,8 @@ import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
 import { UserToReturn } from './types';
 import { GetUsersFilterDto, UpdateUserDto } from './dto';
+import { formatUser } from './utils';
 import { User } from './user.entity';
-import { formatUser } from '@user/utils';
 
 /**
  * User Service
@@ -29,12 +29,12 @@ class UserService {
 
     if (search) {
       await query.andWhere(
-        '(user.first_name LIKE :search OR user.last_name LIKE :search OR user.username LIKE :search OR user.phone_number LIKE :search OR user.email LIKE :search)',
+        '(user.firstname LIKE :search OR user.lastname LIKE :search OR user.username LIKE :search OR user.phone_number LIKE :search OR user.email LIKE :search)',
         { search: `%${search}%` },
       );
     }
 
-    const { total, data } = await paginate<User>(query, page, perPage);
+    const { total, data } = await paginate<User>({ query, page, perPage });
 
     const response: { total: number; perPage?: number; users: UserToReturn[] } =
       {
@@ -67,9 +67,9 @@ class UserService {
   }
 
   /**
-   * Update user info
+   * Update user by id
    */
-  async updateUserInfo(
+  async updateUserById(
     id: number,
     body: UpdateUserDto,
   ): Promise<{ user: UserToReturn }> {
@@ -79,25 +79,23 @@ class UserService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    const {
-      username,
-      password,
-      firstname,
-      lastname,
-      phoneNumber,
-      email,
-      role,
-    } = body;
+    Object.keys(body).map((key) => {
+      switch (key) {
+        case 'phoneNumber':
+          user.phone_number = body.phoneNumber;
 
-    user.username = username;
-    user.first_name = firstname;
-    user.last_name = lastname;
-    user.phone_number = phoneNumber;
-    user.email = email;
-    user.role = role;
+          break;
 
-    if (password) {
-      user.password = await this.hashPassword(password, user.salt);
+        case 'password':
+          break;
+
+        default:
+          user[key] = body[key];
+      }
+    });
+
+    if (body.password) {
+      user.password = await this.hashPassword(body.password, user.salt);
     }
 
     await user.save();

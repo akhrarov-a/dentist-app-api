@@ -3,11 +3,10 @@ import {
   Controller,
   Get,
   Post,
-  Req,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { UserRole, UserToReturn } from '@user';
+import { GetUser, User, UserRole, UserToReturn } from '@user';
 import { SignInCredentialsDto, SignUpCredentialsDto } from './dto';
 import { UserRoleValidationPipe } from './pipes';
 import { AuthService } from './auth.service';
@@ -46,10 +45,8 @@ class AuthController {
    */
   @Get('/me')
   @UseGuards(AuthGuard('jwt'))
-  getMe(@Req() req): Promise<{ user: UserToReturn }> {
-    const token = req.headers.authorization.replace('Bearer ', '');
-
-    return this.authService.getMe(token);
+  getMe(@GetUser() user: User): Promise<{ user: UserToReturn }> {
+    return this.authService.getMe(user.id);
   }
 }
 

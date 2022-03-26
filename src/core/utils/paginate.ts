@@ -3,11 +3,15 @@ import { SelectQueryBuilder } from 'typeorm';
 /**
  * Paginate
  */
-const paginate = async <T>(
-  query: SelectQueryBuilder<T>,
-  page: number,
-  perPage: number,
-): Promise<{ total: number; data: T[] }> => {
+const paginate = async <T>({
+  query,
+  page,
+  perPage,
+}: {
+  query: SelectQueryBuilder<T>;
+  page: number;
+  perPage: number;
+}): Promise<{ total: number; data: T[] }> => {
   if (page && perPage) {
     const totalCount = await query.getCount();
 

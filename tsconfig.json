@@ -23,7 +23,9 @@
       "@auth": ["./src/modules/auth/index"],
       "@auth/*": ["./src/modules/auth/*"],
       "@user": ["./src/modules/user/index"],
-      "@user/*": ["./src/modules/user/*"]
+      "@user/*": ["./src/modules/user/*"],
+      "@patient": ["./src/modules/patient/index"],
+      "@patient/*": ["./src/modules/patient/*"]
     }
   }
 }

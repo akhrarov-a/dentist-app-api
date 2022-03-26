@@ -15,12 +15,13 @@ import { UserRole, UserToReturn } from './types';
 import { GetUsersFilterDto, UpdateUserDto } from './dto';
 import { UserService } from './user.service';
 import { UserRoleValidationPipe } from '@auth/pipes';
+import { AdminGuard } from '@core';
 
 /**
  * User Controller
  */
 @Controller('users')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'), AdminGuard)
 class UserController {
   constructor(private userService: UserService) {}
 
@@ -45,15 +46,15 @@ class UserController {
   }
 
   /**
-   * Update user info
+   * Update user by id
    */
   @Patch('/:id')
-  updateUserInfo(
+  updateUserById(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) body: UpdateUserDto,
     @Body('role', UserRoleValidationPipe) role: UserRole,
   ): Promise<{ user: UserToReturn }> {
-    return this.userService.updateUserInfo(id, body);
+    return this.userService.updateUserById(id, body);
   }
 
   /**
