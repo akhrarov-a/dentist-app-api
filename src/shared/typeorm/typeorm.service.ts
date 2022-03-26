@@ -42,8 +42,6 @@ class TypeOrmConfigService implements TypeOrmOptionsFactory {
       };
     }
 
-    console.log(options);
-
     return options;
   }
 }
