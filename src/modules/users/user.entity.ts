@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { UserRole } from './types';
 
 @Entity('users')
-@Unique(['email', 'phone'])
+@Unique(['email'])
 export class UserEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;

@@ -67,14 +67,15 @@ export class UsersService {
     try {
       await user.save();
     } catch (error) {
-      console.log(error);
-
       if (error.code === '23505') {
-        throw new ConflictException('User already exists');
+        throw new ConflictException('User with this email already exists');
       } else {
         throw new InternalServerErrorException();
       }
     }
+
+    delete user.password;
+    delete user.salt;
 
     return user;
   }
