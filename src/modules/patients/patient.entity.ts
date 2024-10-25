@@ -32,7 +32,10 @@ export class PatientEntity extends BaseEntity {
   @Column({ nullable: true })
   email: string;
 
-  @ApiProperty({ description: 'The description of the patient' })
+  @ApiProperty({
+    description: 'The description of the patient',
+    required: false,
+  })
   @Column({ nullable: true })
   description: string;
 

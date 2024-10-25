@@ -7,7 +7,7 @@ import {
   CreatePatientDto,
   GetPatientsFilterDto,
   GetPatientsResponseDto,
-  UpdatePatientDto,
+  UpdatePatientByIdDto,
 } from './dto';
 import { PatientEntity } from './patient.entity';
 
@@ -91,19 +91,19 @@ export class PatientsService {
 
   async updatePatientById(
     id: number,
-    updatePatientDto: UpdatePatientDto,
+    updatePatientByIdDto: UpdatePatientByIdDto,
     user: UserEntity,
   ): Promise<PatientEntity> {
     const patient = await this.getPatientById(id, user);
 
-    Object.keys(updatePatientDto).map((key) => {
-      patient[key] = updatePatientDto[key];
+    Object.keys(updatePatientByIdDto).map((key) => {
+      patient[key] = updatePatientByIdDto[key];
     });
 
     return await this.patientRepository.save(patient);
   }
 
-  async deletePatient(id: number, user: UserEntity): Promise<void> {
+  async deletePatientById(id: number, user: UserEntity): Promise<void> {
     const result = await this.patientRepository.delete({ id, userId: user.id });
 
     if (result.affected === 0) {

@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdatePatientDto {
+export class UpdatePatientByIdDto {
   @ApiProperty({ description: 'Firstname of the patient', required: false })
   @IsOptional()
   @IsString()

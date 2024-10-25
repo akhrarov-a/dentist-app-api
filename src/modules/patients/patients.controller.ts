@@ -20,7 +20,7 @@ import {
   CreatePatientDto,
   GetPatientsFilterDto,
   GetPatientsResponseDto,
-  UpdatePatientDto,
+  UpdatePatientByIdDto,
 } from './dto';
 import { PatientsService } from './patients.service';
 import { PatientEntity } from './patient.entity';
@@ -90,10 +90,14 @@ export class PatientsController {
   @Patch('/:id')
   updatePatient(
     @Param('id', ParseIntPipe) id: number,
-    @Body(ValidationPipe) updatePatientDto: UpdatePatientDto,
+    @Body(ValidationPipe) updatePatientByIdDto: UpdatePatientByIdDto,
     @GetUser() user: UserEntity,
   ): Promise<PatientEntity> {
-    return this.patientsService.updatePatientById(id, updatePatientDto, user);
+    return this.patientsService.updatePatientById(
+      id,
+      updatePatientByIdDto,
+      user,
+    );
   }
 
   @ApiOperation({
@@ -108,6 +112,6 @@ export class PatientsController {
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: UserEntity,
   ): Promise<void> {
-    return this.patientsService.deletePatient(id, user);
+    return this.patientsService.deletePatientById(id, user);
   }
 }
