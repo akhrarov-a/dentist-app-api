@@ -1,10 +1,12 @@
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
   Unique,
+  UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { PatientEntity } from '@patients/patient.entity';
@@ -39,6 +41,12 @@ export class UserEntity extends BaseEntity {
 
   @Column()
   role: UserRole;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @OneToMany(() => PatientEntity, (patient) => patient.user, { eager: true })
   patients: PatientEntity[];

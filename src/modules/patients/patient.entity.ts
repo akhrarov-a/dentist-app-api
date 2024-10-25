@@ -1,9 +1,11 @@
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserEntity } from '@users/user.entity';
@@ -33,6 +35,12 @@ export class PatientEntity extends BaseEntity {
   @ApiProperty({ description: 'The description of the patient' })
   @Column({ nullable: true })
   description: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.patients, { eager: false })
   user: UserEntity;

@@ -25,4 +25,10 @@ export class UserToReturn {
     enum: UserRole,
   })
   role: UserRole;
+
+  @ApiProperty({ description: 'Created date and time of the user' })
+  createdAt: Date;
+
+  @ApiProperty({ description: 'Updated date and time of the user' })
+  updatedAt: Date;
 }
