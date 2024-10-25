@@ -35,8 +35,10 @@ export class AppointmentsService {
 
     const query = this.appointmentRepository.createQueryBuilder('appointment');
 
+    query.andWhere('appointment.userId = :userId', { userId: user.id });
+
     query
-      .where('appointment.startTime >= :startOfDay', { startOfDay })
+      .andWhere('appointment.startTime >= :startOfDay', { startOfDay })
       .andWhere('appointment.endTime <= :endOfDay', { endOfDay });
 
     const appointments = await query.getMany();
