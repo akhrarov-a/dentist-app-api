@@ -19,7 +19,8 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@config/*": ["./src/config/*"],
-      "@patients/*": ["./src/modules/patients/*"]
+      "@patients/*": ["./src/modules/patients/*"],
+      "@users/*": ["./src/modules/users/*"],
     }
   }
 }
