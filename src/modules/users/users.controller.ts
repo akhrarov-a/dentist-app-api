@@ -8,13 +8,16 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDto, GetUsersFilterDto, UpdateUserDto } from './dto';
 import { UsersService } from './users.service';
 import { UserEntity } from './user.entity';
 
 @Controller('users')
+@UseGuards(AuthGuard())
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

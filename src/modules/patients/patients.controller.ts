@@ -8,8 +8,10 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   CreatePatientDto,
   GetPatientsFilterDto,
@@ -19,6 +21,7 @@ import { PatientsService } from './patients.service';
 import { PatientEntity } from './patient.entity';
 
 @Controller('patients')
+@UseGuards(AuthGuard())
 export class PatientsController {
   constructor(private readonly patientsService: PatientsService) {}
 
