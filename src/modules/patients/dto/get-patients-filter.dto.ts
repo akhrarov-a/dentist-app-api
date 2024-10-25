@@ -1,6 +1,7 @@
 import {
   IsEmail,
   IsNotEmpty,
+  IsNumberString,
   IsOptional,
   IsPhoneNumber,
   IsString,
@@ -39,4 +40,14 @@ export class GetPatientsFilterDto {
   @IsString()
   @IsNotEmpty()
   description: string;
+
+  @ApiProperty({ description: 'Page number', required: false })
+  @IsOptional()
+  @IsNumberString()
+  page: number;
+
+  @ApiProperty({ description: 'Patient per page number', required: false })
+  @IsOptional()
+  @IsNumberString()
+  perPage: number;
 }

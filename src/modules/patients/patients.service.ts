@@ -2,9 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '@users/user.entity';
+import { paginate } from '@core';
 import {
   CreatePatientDto,
   GetPatientsFilterDto,
+  GetPatientsResponseDto,
   UpdatePatientDto,
 } from './dto';
 import { PatientEntity } from './patient.entity';
@@ -17,9 +19,9 @@ export class PatientsService {
   ) {}
 
   async getPatients(
-    filterDto: GetPatientsFilterDto,
+    { page, perPage, ...filterDto }: GetPatientsFilterDto,
     user: UserEntity,
-  ): Promise<PatientEntity[]> {
+  ): Promise<GetPatientsResponseDto> {
     const query = this.patientRepository.createQueryBuilder('patient');
 
     query.andWhere(`patient.userId = :userId`, { userId: user.id });
@@ -32,7 +34,24 @@ export class PatientsService {
       });
     });
 
-    return await query.getMany();
+    const { totalAmount, totalPages, data } = await paginate<PatientEntity>({
+      query,
+      page,
+      perPage,
+    });
+
+    const response: GetPatientsResponseDto = {
+      data,
+      totalPatients: totalAmount,
+      totalPages: totalPages,
+    };
+
+    if (page && perPage) {
+      response.page = +page;
+      response.perPage = +perPage;
+    }
+
+    return response;
   }
 
   async getPatientById(id: number, user: UserEntity): Promise<PatientEntity> {

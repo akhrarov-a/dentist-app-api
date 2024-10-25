@@ -19,6 +19,7 @@ import { UserEntity } from '@users/user.entity';
 import {
   CreatePatientDto,
   GetPatientsFilterDto,
+  GetPatientsResponseDto,
   UpdatePatientDto,
 } from './dto';
 import { PatientsService } from './patients.service';
@@ -36,13 +37,13 @@ export class PatientsController {
   })
   @ApiOkResponse({
     description: 'Successfully get',
-    type: [PatientEntity],
+    type: GetPatientsResponseDto,
   })
   @Get()
   getPatients(
     @Query(ValidationPipe) filterDto: GetPatientsFilterDto,
     @GetUser() user: UserEntity,
-  ): Promise<PatientEntity[]> {
+  ): Promise<GetPatientsResponseDto> {
     return this.patientsService.getPatients(filterDto, user);
   }
 
