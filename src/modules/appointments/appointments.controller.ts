@@ -7,10 +7,16 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { GetUser } from '@users/utils';
 import { UserEntity } from '@users/user.entity';
 import { AuthGuard } from '@nestjs/passport';
@@ -18,6 +24,7 @@ import { DentistGuard } from '@core';
 import {
   AppointmentResponseWithPatientDto,
   CreateAppointmentDto,
+  GetAppointmentsByDateResponseDto,
   UpdateAppointmentDto,
 } from './dto';
 import { AppointmentsService } from './appointments.service';
@@ -27,6 +34,28 @@ import { AppointmentsService } from './appointments.service';
 @UseGuards(AuthGuard(), DentistGuard)
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
+
+  @ApiOperation({
+    summary: 'Request for getting appointments by date',
+    description: 'If you want to get appointments by date, use this request',
+  })
+  @ApiOkResponse({
+    description: 'Successfully get',
+    type: GetAppointmentsByDateResponseDto,
+  })
+  @ApiQuery({
+    name: 'date',
+    required: true,
+    description:
+      'Date for which to retrieve appointments in "YYYY-MM-DD" format.',
+  })
+  @Get()
+  getAppointmentsByDate(
+    @Query('date') date: string,
+    @GetUser() user: UserEntity,
+  ): Promise<GetAppointmentsByDateResponseDto> {
+    return this.appointmentsService.getAppointmentsByDate(date, user);
+  }
 
   @ApiOperation({
     summary: 'Request for getting an appointment by id',
