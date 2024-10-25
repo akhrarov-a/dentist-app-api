@@ -5,6 +5,7 @@ import { TypeOrmConfigService } from '@core';
 import { AuthModule } from '@auth/auth.module';
 import { PatientsModule } from '@patients/patients.module';
 import { UsersModule } from '@users/users.module';
+import { AppointmentsModule } from '@appointments/appointments.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { UsersModule } from '@users/users.module';
     PatientsModule,
     UsersModule,
     AuthModule,
+    AppointmentsModule,
   ],
 })
 export class AppModule {}

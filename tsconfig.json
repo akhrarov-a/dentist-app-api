@@ -22,6 +22,7 @@
       "@config/*": ["./src/config/*"],
       "@core": ["./src/core/index"],
       "@core/*": ["./src/core/*"],
+      "@appointments/*": ["./src/modules/appointments/*"],
       "@auth/*": ["./src/modules/auth/*"],
       "@patients/*": ["./src/modules/patients/*"],
       "@users/*": ["./src/modules/users/*"],
