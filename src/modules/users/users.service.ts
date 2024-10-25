@@ -19,7 +19,15 @@ export class UsersService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  async getUsers(filterDto: GetUsersFilterDto): Promise<UserEntity[]> {
+  async getCurrent(userId: number): Promise<UserToReturn> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    return formatUserToReturn(user);
+  }
+
+  async getUsers(filterDto: GetUsersFilterDto): Promise<UserToReturn[]> {
     const query = this.userRepository.createQueryBuilder('user');
 
     Object.entries(filterDto).forEach(([key, value]) => {
@@ -36,20 +44,20 @@ export class UsersService {
       });
     });
 
-    return await query.getMany();
+    return (await query.getMany()).map(formatUserToReturn);
   }
 
-  async getUserById(id: number): Promise<UserEntity> {
+  async getUserById(id: number): Promise<UserToReturn> {
     const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    return user;
+    return formatUserToReturn(user);
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
+  async createUser(createUserDto: CreateUserDto): Promise<UserToReturn> {
     const { firstname, lastname, phone, password, role, email, description } =
       createUserDto;
 
@@ -74,16 +82,13 @@ export class UsersService {
       }
     }
 
-    delete user.password;
-    delete user.salt;
-
-    return user;
+    return formatUserToReturn(user);
   }
 
   async updateUserById(
     id: number,
     updateUserDto: UpdateUserDto,
-  ): Promise<UserEntity> {
+  ): Promise<UserToReturn> {
     const user = await this.userRepository.preload({
       id,
       ...updateUserDto,
@@ -93,7 +98,7 @@ export class UsersService {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    return await this.userRepository.save(user);
+    return formatUserToReturn(await this.userRepository.save(user));
   }
 
   async deleteUser(id: number): Promise<void> {
@@ -102,16 +107,6 @@ export class UsersService {
     if (result.affected === 0) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
-  }
-
-  async getCurrent(userId: number): Promise<{ user: UserToReturn }> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-    });
-
-    return {
-      user: formatUserToReturn(user),
-    };
   }
 
   private async hashPassword(password: string, salt: string): Promise<string> {

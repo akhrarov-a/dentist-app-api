@@ -11,6 +11,7 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { DentistGuard } from '@core';
 import { GetUser } from '@users/utils';
@@ -22,7 +23,6 @@ import {
 } from './dto';
 import { PatientsService } from './patients.service';
 import { PatientEntity } from './patient.entity';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('patients')
 @ApiTags('Patients')
