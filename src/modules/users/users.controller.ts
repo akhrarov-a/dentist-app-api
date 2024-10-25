@@ -14,7 +14,12 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '@core';
-import { CreateUserDto, GetUsersFilterDto, UpdateUserDto } from './dto';
+import {
+  CreateUserDto,
+  GetUsersFilterDto,
+  GetUsersResponseDto,
+  UpdateUserDto,
+} from './dto';
 import { UsersService } from './users.service';
 import { UserEntity } from './user.entity';
 import { GetUser } from './utils';
@@ -45,13 +50,13 @@ export class UsersController {
   })
   @ApiOkResponse({
     description: 'Successfully get',
-    type: [UserToReturn],
+    type: GetUsersResponseDto,
   })
   @Get()
   @UseGuards(AdminGuard)
   getUsers(
     @Query(ValidationPipe) filterDto: GetUsersFilterDto,
-  ): Promise<UserToReturn[]> {
+  ): Promise<GetUsersResponseDto> {
     return this.usersService.getUsers(filterDto);
   }
 

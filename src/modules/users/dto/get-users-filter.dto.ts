@@ -2,6 +2,7 @@ import {
   IsEmail,
   IsIn,
   IsNotEmpty,
+  IsNumberString,
   IsOptional,
   IsPhoneNumber,
   IsString,
@@ -50,4 +51,14 @@ export class GetUsersFilterDto {
   @IsOptional()
   @IsIn([UserRole.ADMIN, UserRole.DENTIST, UserRole.PATIENT])
   role: UserRole;
+
+  @ApiProperty({ description: 'Page number', required: false })
+  @IsOptional()
+  @IsNumberString()
+  page: number;
+
+  @ApiProperty({ description: 'User per page number', required: false })
+  @IsOptional()
+  @IsNumberString()
+  perPage: number;
 }

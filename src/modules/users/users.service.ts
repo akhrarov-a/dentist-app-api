@@ -8,7 +8,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { formatUserToReturn } from './utils';
-import { CreateUserDto, GetUsersFilterDto, UpdateUserDto } from './dto';
+import { paginate } from '@core';
+import {
+  CreateUserDto,
+  GetUsersFilterDto,
+  GetUsersResponseDto,
+  UpdateUserDto,
+} from './dto';
 import { UserEntity } from './user.entity';
 import { UserToReturn } from './types';
 
@@ -27,7 +33,11 @@ export class UsersService {
     return formatUserToReturn(user);
   }
 
-  async getUsers(filterDto: GetUsersFilterDto): Promise<UserToReturn[]> {
+  async getUsers({
+    page,
+    perPage,
+    ...filterDto
+  }: GetUsersFilterDto): Promise<GetUsersResponseDto> {
     const query = this.userRepository.createQueryBuilder('user');
 
     Object.entries(filterDto).forEach(([key, value]) => {
@@ -39,12 +49,29 @@ export class UsersService {
         return;
       }
 
-      query.andWhere(`patient.${key} LIKE :${key}`, {
+      query.andWhere(`user.${key} LIKE :${key}`, {
         [key]: `%${value}%`,
       });
     });
 
-    return (await query.getMany()).map(formatUserToReturn);
+    const { totalAmount, totalPages, data } = await paginate<UserEntity>({
+      query,
+      page,
+      perPage,
+    });
+
+    const response: GetUsersResponseDto = {
+      data: data.map(formatUserToReturn),
+      totalUsers: totalAmount,
+      totalPages: totalPages,
+    };
+
+    if (page && perPage) {
+      response.page = +page;
+      response.perPage = +perPage;
+    }
+
+    return response;
   }
 
   async getUserById(id: number): Promise<UserToReturn> {
