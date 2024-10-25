@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsPhoneNumber,
   IsString,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -36,8 +37,11 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(4)
+  @MinLength(8)
   @MaxLength(20)
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message: 'password too weak',
+  })
   password: string;
 
   @IsIn([UserRole.ADMIN, UserRole.DENTIST, UserRole.PATIENT])

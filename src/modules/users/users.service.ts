@@ -1,6 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { formatUserToReturn } from './utils';
 import { CreateUserDto, GetUsersFilterDto, UpdateUserDto } from './dto';
 import { UserEntity } from './user.entity';
 
@@ -50,12 +57,23 @@ export class UsersService {
     user.firstname = firstname;
     user.lastname = lastname;
     user.phone = phone;
-    user.password = password;
     user.role = role;
     user.email = email;
     user.description = description;
+    user.salt = await bcrypt.genSalt();
+    user.password = await this.hashPassword(password, user.salt);
 
-    await user.save();
+    try {
+      await user.save();
+    } catch (error) {
+      console.log(error);
+
+      if (error.code === '23505') {
+        throw new ConflictException('User already exists');
+      } else {
+        throw new InternalServerErrorException();
+      }
+    }
 
     return user;
   }
@@ -82,5 +100,19 @@ export class UsersService {
     if (result.affected === 0) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
+  }
+
+  async getCurrent(userId: number): Promise<{ user: Partial<UserEntity> }> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    return {
+      user: formatUserToReturn(user),
+    };
+  }
+
+  private async hashPassword(password: string, salt: string): Promise<string> {
+    return bcrypt.hash(password, salt);
   }
 }
