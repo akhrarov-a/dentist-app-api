@@ -6,13 +6,13 @@ export class PatientEntity extends BaseEntity {
   id: number;
 
   @Column()
-  firstName: string;
+  firstname: string;
 
   @Column()
-  lastName: string;
+  lastname: string;
 
   @Column()
-  phoneNumber: string;
+  phone: string;
 
   @Column({ nullable: true })
   email: string;

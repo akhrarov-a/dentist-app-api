@@ -12,41 +12,21 @@ export class UsersService {
   ) {}
 
   async getUsers(filterDto: GetUsersFilterDto): Promise<UserEntity[]> {
-    const { firstname, lastname, phone, role, email, description } = filterDto;
-
     const query = this.userRepository.createQueryBuilder('user');
 
-    if (firstname) {
-      query.andWhere('user.firstname LIKE :firstname', {
-        firstname: `%${firstname}%`,
+    Object.entries(filterDto).forEach(([key, value]) => {
+      if (!value) return;
+
+      if (key === 'role') {
+        query.andWhere('user.role = :role', { role: value });
+
+        return;
+      }
+
+      query.andWhere(`patient.${key} LIKE :${key}`, {
+        [key]: `%${value}%`,
       });
-    }
-
-    if (lastname) {
-      query.andWhere('user.lastname LIKE :lastname', {
-        lastname: `%${lastname}%`,
-      });
-    }
-
-    if (phone) {
-      query.andWhere('user.phone LIKE :phone', {
-        phone: `%${phone}%`,
-      });
-    }
-
-    if (email) {
-      query.andWhere('user.email LIKE :email', { email: `%${email}%` });
-    }
-
-    if (role) {
-      query.andWhere('user.role = :role', { role });
-    }
-
-    if (description) {
-      query.andWhere('user.description LIKE :description', {
-        description: `%${description}%`,
-      });
-    }
+    });
 
     return await query.getMany();
   }

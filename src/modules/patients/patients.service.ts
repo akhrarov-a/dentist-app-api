@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { GetPatientsFilterDto } from './dto/get-patients-filter.dto';
-import { CreatePatientDto } from './dto/create-patient.dto';
-import { UpdatePatientDto } from './dto/update-patient.dto';
+import {
+  CreatePatientDto,
+  GetPatientsFilterDto,
+  UpdatePatientDto,
+} from './dto';
 import { PatientEntity } from './patient.entity';
 
 @Injectable()
@@ -14,37 +16,15 @@ export class PatientsService {
   ) {}
 
   async getPatients(filterDto: GetPatientsFilterDto): Promise<PatientEntity[]> {
-    const { firstName, lastName, phoneNumber, email, description } = filterDto;
-
     const query = this.patientRepository.createQueryBuilder('patient');
 
-    if (firstName) {
-      query.andWhere('patient.firstName LIKE :firstName', {
-        firstName: `%${firstName}%`,
-      });
-    }
+    Object.entries(filterDto).forEach(([key, value]) => {
+      if (!value) return;
 
-    if (lastName) {
-      query.andWhere('patient.lastName LIKE :lastName', {
-        lastName: `%${lastName}%`,
+      query.andWhere(`patient.${key} LIKE :${key}`, {
+        [key]: `%${value}%`,
       });
-    }
-
-    if (phoneNumber) {
-      query.andWhere('patient.phoneNumber LIKE :phoneNumber', {
-        phoneNumber: `%${phoneNumber}%`,
-      });
-    }
-
-    if (email) {
-      query.andWhere('patient.email LIKE :email', { email: `%${email}%` });
-    }
-
-    if (description) {
-      query.andWhere('patient.description LIKE :description', {
-        description: `%${description}%`,
-      });
-    }
+    });
 
     return await query.getMany();
   }
@@ -62,14 +42,13 @@ export class PatientsService {
   async createPatient(
     createPatientDto: CreatePatientDto,
   ): Promise<PatientEntity> {
-    const { firstName, lastName, phoneNumber, email, description } =
-      createPatientDto;
+    const { firstname, lastname, phone, email, description } = createPatientDto;
 
     const patient = new PatientEntity();
 
-    patient.firstName = firstName;
-    patient.lastName = lastName;
-    patient.phoneNumber = phoneNumber;
+    patient.firstname = firstname;
+    patient.lastname = lastname;
+    patient.phone = phone;
     patient.email = email;
     patient.description = description;
 

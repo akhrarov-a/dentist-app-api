@@ -10,9 +10,11 @@ import {
   Query,
   ValidationPipe,
 } from '@nestjs/common';
-import { GetPatientsFilterDto } from './dto/get-patients-filter.dto';
-import { CreatePatientDto } from './dto/create-patient.dto';
-import { UpdatePatientDto } from './dto/update-patient.dto';
+import {
+  CreatePatientDto,
+  GetPatientsFilterDto,
+  UpdatePatientDto,
+} from './dto';
 import { PatientsService } from './patients.service';
 import { PatientEntity } from './patient.entity';
 

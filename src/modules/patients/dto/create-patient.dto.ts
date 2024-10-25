@@ -9,16 +9,16 @@ import {
 export class CreatePatientDto {
   @IsNotEmpty()
   @IsString()
-  firstName: string;
+  firstname: string;
 
   @IsNotEmpty()
   @IsString()
-  lastName: string;
+  lastname: string;
 
   @IsNotEmpty()
   @IsString()
   @IsPhoneNumber('UZ')
-  phoneNumber: string;
+  phone: string;
 
   @IsOptional()
   @IsNotEmpty()

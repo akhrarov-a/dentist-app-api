@@ -10,18 +10,18 @@ export class GetPatientsFilterDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  firstName: string;
+  firstname: string;
 
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  lastName: string;
+  lastname: string;
 
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   @IsPhoneNumber('UZ')
-  phoneNumber: string;
+  phone: string;
 
   @IsOptional()
   @IsString()
