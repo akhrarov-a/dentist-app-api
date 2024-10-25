@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { formatUserToReturn } from './utils';
 import { CreateUserDto, GetUsersFilterDto, UpdateUserDto } from './dto';
 import { UserEntity } from './user.entity';
+import { UserToReturn } from './types';
 
 @Injectable()
 export class UsersService {
@@ -102,7 +103,7 @@ export class UsersService {
     }
   }
 
-  async getCurrent(userId: number): Promise<{ user: Partial<UserEntity> }> {
+  async getCurrent(userId: number): Promise<{ user: UserToReturn }> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });

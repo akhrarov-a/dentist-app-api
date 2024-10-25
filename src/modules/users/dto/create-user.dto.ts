@@ -9,6 +9,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { passwordRegex } from '@core';
 import { UserRole } from '../types';
 
 export class CreateUserDto {
@@ -39,9 +40,7 @@ export class CreateUserDto {
   @IsString()
   @MinLength(8)
   @MaxLength(20)
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message: 'password too weak',
-  })
+  @Matches(passwordRegex, { message: 'password too weak' })
   password: string;
 
   @IsIn([UserRole.ADMIN, UserRole.DENTIST, UserRole.PATIENT])

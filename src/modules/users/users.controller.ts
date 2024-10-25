@@ -12,9 +12,11 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from './utils';
 import { CreateUserDto, GetUsersFilterDto, UpdateUserDto } from './dto';
 import { UsersService } from './users.service';
 import { UserEntity } from './user.entity';
+import { UserToReturn } from './types';
 
 @Controller('users')
 @UseGuards(AuthGuard())
@@ -51,5 +53,10 @@ export class UsersController {
   @Delete('/:id')
   deleteUserById(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.usersService.deleteUser(id);
+  }
+
+  @Get('/current')
+  getCurrent(@GetUser() user: UserEntity): Promise<{ user: UserToReturn }> {
+    return this.usersService.getCurrent(user.id);
   }
 }
