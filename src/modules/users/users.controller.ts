@@ -13,16 +13,21 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard } from '@core';
-import { GetUser } from './utils';
 import { CreateUserDto, GetUsersFilterDto, UpdateUserDto } from './dto';
 import { UsersService } from './users.service';
 import { UserEntity } from './user.entity';
+import { GetUser } from './utils';
 import { UserToReturn } from './types';
 
 @Controller('users')
 @UseGuards(AuthGuard())
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get('/current')
+  getCurrent(@GetUser() user: UserEntity): Promise<{ user: UserToReturn }> {
+    return this.usersService.getCurrent(user.id);
+  }
 
   @Get()
   @UseGuards(AdminGuard)
@@ -59,10 +64,5 @@ export class UsersController {
   @UseGuards(AdminGuard)
   deleteUserById(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.usersService.deleteUser(id);
-  }
-
-  @Get('/current')
-  getCurrent(@GetUser() user: UserEntity): Promise<{ user: UserToReturn }> {
-    return this.usersService.getCurrent(user.id);
   }
 }

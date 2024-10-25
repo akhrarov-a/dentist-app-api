@@ -1,4 +1,11 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { UserEntity } from '@users/user.entity';
 
 @Entity('patients')
 export class PatientEntity extends BaseEntity {
@@ -19,4 +26,10 @@ export class PatientEntity extends BaseEntity {
 
   @Column({ nullable: true })
   description: string;
+
+  @ManyToOne(() => UserEntity, (user) => user.patients, { eager: false })
+  user: UserEntity;
+
+  @Column()
+  userId: number;
 }

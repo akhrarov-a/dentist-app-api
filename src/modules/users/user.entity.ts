@@ -2,10 +2,12 @@ import {
   BaseEntity,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { PatientEntity } from '@patients/patient.entity';
 import { UserRole } from './types';
 
 @Entity('users')
@@ -37,6 +39,9 @@ export class UserEntity extends BaseEntity {
 
   @Column()
   role: UserRole;
+
+  @OneToMany(() => PatientEntity, (patient) => patient.user, { eager: true })
+  patients: PatientEntity[];
 
   async validatePassword(password: string): Promise<boolean> {
     const hash = await bcrypt.hash(password, this.salt);
