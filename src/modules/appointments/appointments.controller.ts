@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -81,5 +82,20 @@ export class AppointmentsController {
       updateAppointmentDto,
       user,
     );
+  }
+
+  @ApiOperation({
+    summary: 'Request for deleting an appointment by id',
+    description: 'If you want to delete an appointment by id, use this request',
+  })
+  @ApiOkResponse({
+    description: 'Successfully deleted',
+  })
+  @Delete('/:id')
+  deleteAppointmentById(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: UserEntity,
+  ): Promise<void> {
+    return this.appointmentsService.deleteAppointmentById(id, user);
   }
 }

@@ -109,6 +109,17 @@ export class AppointmentsService {
     );
   }
 
+  async deleteAppointmentById(id: number, user: UserEntity): Promise<void> {
+    const result = await this.appointmentRepository.delete({
+      id,
+      userId: user.id,
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Appointment with id ${id} not found`);
+    }
+  }
+
   private async appointmentResponseWithPatient(
     { patientId, ...appointment }: AppointmentEntity,
     user: UserEntity,
