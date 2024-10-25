@@ -12,6 +12,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { AdminGuard } from '@core';
 import { GetUser } from './utils';
 import { CreateUserDto, GetUsersFilterDto, UpdateUserDto } from './dto';
 import { UsersService } from './users.service';
@@ -24,6 +25,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @UseGuards(AdminGuard)
   getUsers(
     @Query(ValidationPipe) filterDto: GetUsersFilterDto,
   ): Promise<UserEntity[]> {
@@ -31,11 +33,13 @@ export class UsersController {
   }
 
   @Get('/:id')
+  @UseGuards(AdminGuard)
   getUserById(@Param('id', ParseIntPipe) id: number): Promise<UserEntity> {
     return this.usersService.getUserById(id);
   }
 
   @Post()
+  @UseGuards(AdminGuard)
   createUser(
     @Body(ValidationPipe) createUserDto: CreateUserDto,
   ): Promise<UserEntity> {
@@ -43,6 +47,7 @@ export class UsersController {
   }
 
   @Patch('/:id')
+  @UseGuards(AdminGuard)
   updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) updateUserDto: UpdateUserDto,
@@ -51,6 +56,7 @@ export class UsersController {
   }
 
   @Delete('/:id')
+  @UseGuards(AdminGuard)
   deleteUserById(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.usersService.deleteUser(id);
   }
