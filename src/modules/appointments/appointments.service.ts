@@ -86,6 +86,7 @@ export class AppointmentsService {
     }
 
     if (patientId) {
+      // check for patient exists
       await this.patientsService.getPatientById(patientId, user);
 
       appointment.patientId = patientId;
@@ -95,7 +96,11 @@ export class AppointmentsService {
       const _startTime = startTime || appointment.startTime;
       const _endTime = endTime || appointment.endTime;
 
+      // check for no another appointment in this time
       await this.checkForOverlappingAppointments(user, _startTime, _endTime);
+
+      appointment.startTime = _startTime;
+      appointment.endTime = _endTime;
     }
 
     return this.appointmentResponseWithPatient(

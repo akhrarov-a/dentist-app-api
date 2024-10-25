@@ -71,7 +71,7 @@ export class AppointmentsController {
     type: AppointmentResponseWithPatientDto,
   })
   @Patch('/:id')
-  updatePatientById(
+  updateAppointmentById(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) updateAppointmentDto: UpdateAppointmentDto,
     @GetUser() user: UserEntity,
