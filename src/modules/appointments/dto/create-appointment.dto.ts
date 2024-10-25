@@ -15,12 +15,12 @@ export class CreateAppointmentDto {
   @ApiProperty({ description: 'Start time of an appointment' })
   @IsNotEmpty()
   @IsDateString()
-  startTime: string;
+  startTime: Date;
 
   @ApiProperty({ description: 'End time of an appointment' })
   @IsNotEmpty()
   @IsDateString()
-  endTime: string;
+  endTime: Date;
 
   @ApiProperty({
     description: 'Description of an appointment',

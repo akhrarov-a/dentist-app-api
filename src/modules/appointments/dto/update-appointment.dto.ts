@@ -20,13 +20,13 @@ export class UpdateAppointmentDto {
   @IsOptional()
   @IsNotEmpty()
   @IsDateString()
-  startTime: string;
+  startTime: Date;
 
   @ApiProperty({ description: 'End time of an appointment', required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsDateString()
-  endTime: string;
+  endTime: Date;
 
   @ApiProperty({
     description: 'Description of an appointment',

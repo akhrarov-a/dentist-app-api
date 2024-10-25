@@ -1,22 +1,54 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '@users/user.entity';
+import { PatientsService } from '@patients/patients.service';
 import { AppointmentEntity } from './appointment.entity';
-import { CreateAppointmentDto } from './dto';
+import {
+  AppointmentResponseWithPatientDto,
+  CreateAppointmentDto,
+  UpdateAppointmentDto,
+} from './dto';
 
 @Injectable()
 export class AppointmentsService {
   constructor(
+    private readonly patientsService: PatientsService,
     @InjectRepository(AppointmentEntity)
     private readonly appointmentRepository: Repository<AppointmentEntity>,
   ) {}
 
+  async getAppointmentById(
+    id: number,
+    user: UserEntity,
+  ): Promise<AppointmentResponseWithPatientDto> {
+    const appointment = await this.appointmentRepository.findOneBy({
+      id,
+      userId: user.id,
+    });
+
+    if (!appointment) {
+      throw new NotFoundException(`Appointment with id ${id} not found`);
+    }
+
+    return this.appointmentResponseWithPatient(appointment, user);
+  }
+
   async createAppointment(
     createAppointmentDto: CreateAppointmentDto,
     user: UserEntity,
-  ): Promise<AppointmentEntity> {
+  ): Promise<AppointmentResponseWithPatientDto> {
     const { patientId, startTime, endTime, description } = createAppointmentDto;
+
+    // check for patient exists
+    await this.patientsService.getPatientById(patientId, user);
+
+    // check for no another appointment in this time
+    await this.checkForOverlappingAppointments(user, startTime, endTime);
 
     const appointment = new AppointmentEntity();
 
@@ -30,6 +62,76 @@ export class AppointmentsService {
 
     delete appointment.user;
 
-    return appointment;
+    return this.appointmentResponseWithPatient(appointment, user);
+  }
+
+  async updateAppointmentById(
+    id: number,
+    updateAppointmentDto: UpdateAppointmentDto,
+    user: UserEntity,
+  ): Promise<AppointmentResponseWithPatientDto> {
+    const appointment = await this.appointmentRepository.findOneBy({
+      id,
+      userId: user.id,
+    });
+
+    if (!appointment) {
+      throw new NotFoundException(`Appointment with id ${id} not found`);
+    }
+
+    const { startTime, endTime, patientId, description } = updateAppointmentDto;
+
+    if (description) {
+      appointment.description = description;
+    }
+
+    if (patientId) {
+      await this.patientsService.getPatientById(patientId, user);
+
+      appointment.patientId = patientId;
+    }
+
+    if (startTime || endTime) {
+      const _startTime = startTime || appointment.startTime;
+      const _endTime = endTime || appointment.endTime;
+
+      await this.checkForOverlappingAppointments(user, _startTime, _endTime);
+    }
+
+    return this.appointmentResponseWithPatient(
+      await this.appointmentRepository.save(appointment),
+      user,
+    );
+  }
+
+  private async appointmentResponseWithPatient(
+    { patientId, ...appointment }: AppointmentEntity,
+    user: UserEntity,
+  ): Promise<AppointmentResponseWithPatientDto> {
+    const patient = await this.patientsService.getPatientById(patientId, user);
+
+    return {
+      ...appointment,
+      patient,
+    };
+  }
+
+  private async checkForOverlappingAppointments(
+    user: UserEntity,
+    startTime: Date,
+    endTime: Date,
+  ): Promise<void> {
+    const query = this.appointmentRepository.createQueryBuilder('appointment');
+
+    query
+      .where('appointment.userId = :userId', { userId: user.id })
+      .andWhere('appointment.startTime < :endTime', { endTime })
+      .andWhere('appointment.endTime > :startTime', { startTime });
+
+    if (!!(await query.getOne())) {
+      throw new ConflictException(
+        'You have already an appointment during this time',
+      );
+    }
   }
 }

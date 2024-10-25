@@ -1,24 +1,23 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
-  BaseEntity,
   Column,
   CreateDateColumn,
-  Entity,
-  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
-import { UserEntity } from '@users/user.entity';
+import { PatientEntity } from '@patients/patient.entity';
 
-@Entity('appointments')
-export class AppointmentEntity extends BaseEntity {
+export class AppointmentResponseWithPatientDto {
   @ApiProperty({ description: 'ID of the appointment' })
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ApiProperty({ description: 'Selected patient for the appointment' })
+  @ApiProperty({
+    description: 'Selected patient for the appointment',
+    type: PatientEntity,
+  })
   @Column()
-  patientId: number;
+  patient: PatientEntity;
 
   @ApiProperty({ description: 'Start time of the appointment' })
   @Column()
@@ -42,9 +41,6 @@ export class AppointmentEntity extends BaseEntity {
   @ApiProperty({ description: 'Updated at time of the appointment' })
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @ManyToOne(() => UserEntity, (user) => user.appointments, { eager: false })
-  user: UserEntity;
 
   @ApiProperty({ description: 'The owner of the appointment' })
   @Column()
