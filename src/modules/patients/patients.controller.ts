@@ -88,7 +88,7 @@ export class PatientsController {
     type: PatientEntity,
   })
   @Patch('/:id')
-  updatePatient(
+  updatePatientById(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) updatePatientByIdDto: UpdatePatientByIdDto,
     @GetUser() user: UserEntity,

@@ -13,7 +13,7 @@ import {
   CreateUserDto,
   GetUsersFilterDto,
   GetUsersResponseDto,
-  UpdateUserDto,
+  UpdateUserByIdDto,
 } from './dto';
 import { UserEntity } from './user.entity';
 import { UserToReturn } from './types';
@@ -25,7 +25,7 @@ export class UsersService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  async getCurrent(userId: number): Promise<UserToReturn> {
+  async getCurrentUser(userId: number): Promise<UserToReturn> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
@@ -114,7 +114,7 @@ export class UsersService {
 
   async updateUserById(
     id: number,
-    updateUserDto: UpdateUserDto,
+    updateUserDto: UpdateUserByIdDto,
   ): Promise<UserToReturn> {
     const user = await this.userRepository.preload({
       id,
@@ -128,7 +128,7 @@ export class UsersService {
     return formatUserToReturn(await this.userRepository.save(user));
   }
 
-  async deleteUser(id: number): Promise<void> {
+  async deleteUserById(id: number): Promise<void> {
     const result = await this.userRepository.delete(id);
 
     if (result.affected === 0) {

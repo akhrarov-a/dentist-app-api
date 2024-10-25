@@ -18,7 +18,7 @@ import {
   CreateUserDto,
   GetUsersFilterDto,
   GetUsersResponseDto,
-  UpdateUserDto,
+  UpdateUserByIdDto,
 } from './dto';
 import { UsersService } from './users.service';
 import { UserEntity } from './user.entity';
@@ -40,8 +40,8 @@ export class UsersController {
     type: UserToReturn,
   })
   @Get('/current')
-  getCurrent(@GetUser() user: UserEntity): Promise<UserToReturn> {
-    return this.usersService.getCurrent(user.id);
+  getCurrentUser(@GetUser() user: UserEntity): Promise<UserToReturn> {
+    return this.usersService.getCurrentUser(user.id);
   }
 
   @ApiOperation({
@@ -100,9 +100,9 @@ export class UsersController {
   })
   @Patch('/:id')
   @UseGuards(AdminGuard)
-  updateUser(
+  updateUserById(
     @Param('id', ParseIntPipe) id: number,
-    @Body(ValidationPipe) updateUserDto: UpdateUserDto,
+    @Body(ValidationPipe) updateUserDto: UpdateUserByIdDto,
   ): Promise<UserToReturn> {
     return this.usersService.updateUserById(id, updateUserDto);
   }
@@ -117,6 +117,6 @@ export class UsersController {
   @Delete('/:id')
   @UseGuards(AdminGuard)
   deleteUserById(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.usersService.deleteUser(id);
+    return this.usersService.deleteUserById(id);
   }
 }

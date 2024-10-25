@@ -9,7 +9,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '../types';
 
-export class UpdateUserDto {
+export class UpdateUserByIdDto {
   @ApiProperty({ description: 'Firstname of the user', required: false })
   @IsOptional()
   @IsString()
