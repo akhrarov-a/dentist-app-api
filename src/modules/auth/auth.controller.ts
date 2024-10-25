@@ -14,8 +14,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({
-    summary: 'Request for sign in',
-    description: 'If you want sign in, use this request',
+    summary: 'Request for signing in',
+    description: 'If you want to sign in, use this request',
   })
   @ApiOkResponse({
     description: 'Successfully logged in',
