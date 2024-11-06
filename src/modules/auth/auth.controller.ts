@@ -5,7 +5,11 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthCredentialsDto, SignInResponseDto } from './dto';
+import {
+  AuthCredentialsDto,
+  RefreshRequestDto,
+  SignInResponseDto,
+} from './dto';
 import { AuthService } from './auth.service';
 
 @ApiTags('Authentication')
@@ -27,5 +31,21 @@ export class AuthController {
     @Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto,
   ): Promise<SignInResponseDto> {
     return this.authService.signIn(authCredentialsDto);
+  }
+
+  @ApiOperation({
+    summary: 'Request for refreshing access token',
+    description: 'If you want to refresh access token, use this request',
+  })
+  @ApiOkResponse({
+    description: 'Successfully refreshed',
+    type: SignInResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @Post('refresh')
+  refresh(
+    @Body(ValidationPipe) refreshRequestDto: RefreshRequestDto,
+  ): Promise<SignInResponseDto> {
+    return this.authService.refreshAccessToken(refreshRequestDto.refreshToken);
   }
 }

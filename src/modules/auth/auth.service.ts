@@ -1,6 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import { UserEntity } from '@users/user.entity';
@@ -13,7 +12,6 @@ export class AuthService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private jwtService: JwtService,
-    private config: ConfigService,
   ) {}
 
   async signIn(
@@ -25,13 +23,50 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload: JwtPayload = { email };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = await this.generateAccessToken(email);
+    const refreshToken = await this.generateRefreshToken(email);
 
     return {
       accessToken,
-      expires: this.config.get<string>('JWT_EXPIRES_IN'),
+      refreshToken,
     };
+  }
+
+  async refreshAccessToken(refreshToken: string): Promise<SignInResponseDto> {
+    try {
+      const decoded = this.jwtService.verify(refreshToken);
+
+      const user = await this.userRepository.findOne({
+        where: { email: decoded.email },
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      return {
+        accessToken: await this.generateAccessToken(user.email),
+        refreshToken,
+      };
+    } catch {
+      throw new Error('Invalid refresh token');
+    }
+  }
+
+  private async generateAccessToken(email: string): Promise<string> {
+    const payload: JwtPayload = { email };
+
+    return this.jwtService.sign(payload, {
+      expiresIn: '15m',
+    });
+  }
+
+  private async generateRefreshToken(email: string): Promise<string> {
+    const payload: JwtPayload = { email };
+
+    return this.jwtService.sign(payload, {
+      expiresIn: '7d',
+    });
   }
 
   private async validateUserPassword(
