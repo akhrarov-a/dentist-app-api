@@ -70,7 +70,7 @@ export class PatientsService {
   async createPatient(
     createPatientDto: CreatePatientDto,
     user: UserEntity,
-  ): Promise<PatientEntity> {
+  ): Promise<Pick<PatientEntity, 'id'>> {
     const { firstname, lastname, phone, email, description } = createPatientDto;
 
     const patient = new PatientEntity();
@@ -84,23 +84,21 @@ export class PatientsService {
 
     await patient.save();
 
-    delete patient.user;
-
-    return patient;
+    return { id: patient.id };
   }
 
   async updatePatientById(
     id: number,
     updatePatientByIdDto: UpdatePatientByIdDto,
     user: UserEntity,
-  ): Promise<PatientEntity> {
+  ): Promise<void> {
     const patient = await this.getPatientById(id, user);
 
     Object.keys(updatePatientByIdDto).map((key) => {
       patient[key] = updatePatientByIdDto[key];
     });
 
-    return await this.patientRepository.save(patient);
+    await this.patientRepository.save(patient);
   }
 
   async deletePatientById(id: number, user: UserEntity): Promise<void> {

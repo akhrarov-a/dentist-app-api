@@ -69,13 +69,15 @@ export class PatientsController {
   })
   @ApiOkResponse({
     description: 'Successfully created',
-    type: PatientEntity,
+    example: {
+      id: 0,
+    },
   })
   @Post()
   createPatient(
     @Body(ValidationPipe) createPatientDto: CreatePatientDto,
     @GetUser() user: UserEntity,
-  ): Promise<PatientEntity> {
+  ): Promise<Pick<PatientEntity, 'id'>> {
     return this.patientsService.createPatient(createPatientDto, user);
   }
 
@@ -85,14 +87,13 @@ export class PatientsController {
   })
   @ApiOkResponse({
     description: 'Successfully updated',
-    type: PatientEntity,
   })
   @Patch('/:id')
   updatePatientById(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) updatePatientByIdDto: UpdatePatientByIdDto,
     @GetUser() user: UserEntity,
-  ): Promise<PatientEntity> {
+  ): Promise<void> {
     return this.patientsService.updatePatientById(
       id,
       updatePatientByIdDto,

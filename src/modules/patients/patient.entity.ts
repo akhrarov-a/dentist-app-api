@@ -39,9 +39,11 @@ export class PatientEntity extends BaseEntity {
   @Column({ nullable: true })
   description: string;
 
+  @ApiProperty({ description: 'Created date and time of the patient' })
   @CreateDateColumn()
   createdAt: Date;
 
+  @ApiProperty({ description: 'Updated date and time of the patient' })
   @UpdateDateColumn()
   updatedAt: Date;
 

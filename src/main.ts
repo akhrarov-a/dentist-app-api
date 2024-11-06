@@ -10,13 +10,9 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const config: ConfigService = app.get(ConfigService);
 
-  if (config.get<string>('NODE_ENV') === 'production') {
-    const origin = config.get<string>('ORIGIN');
-
-    app.enableCors({ origin });
-
-    logger.log(`Accepting requests from origin ${origin}`);
-  }
+  const origin = config.get<string>('ORIGIN');
+  app.enableCors({ origin });
+  logger.log(`Accepting requests from origin ${origin}`);
 
   app.setGlobalPrefix('api/v1');
 
