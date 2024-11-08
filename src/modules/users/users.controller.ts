@@ -19,6 +19,7 @@ import {
   GetCurrentUserResponseDto,
   GetUsersFilterDto,
   GetUsersResponseDto,
+  UpdateCurrentUserDto,
   UpdateUserByIdDto,
 } from './dto';
 import { UsersService } from './users.service';
@@ -45,6 +46,21 @@ export class UsersController {
     @GetUser() user: UserEntity,
   ): Promise<GetCurrentUserResponseDto> {
     return this.usersService.getCurrentUser(user.id);
+  }
+
+  @ApiOperation({
+    summary: 'Request for updating current user',
+    description: 'If you want to update current user, use this request',
+  })
+  @ApiOkResponse({
+    description: 'Successfully updated',
+  })
+  @Patch('/current')
+  updateCurrentUser(
+    @Body(ValidationPipe) updateCurrentUserDto: UpdateCurrentUserDto,
+    @GetUser() user: UserEntity,
+  ): Promise<void> {
+    return this.usersService.updateCurrentUser(user.id, updateCurrentUserDto);
   }
 
   @ApiOperation({

@@ -14,6 +14,7 @@ import {
   GetCurrentUserResponseDto,
   GetUsersFilterDto,
   GetUsersResponseDto,
+  UpdateCurrentUserDto,
   UpdateUserByIdDto,
 } from './dto';
 import { UserEntity } from './user.entity';
@@ -43,6 +44,22 @@ export class UsersService {
       phone: user.phone,
       role: user.role,
     };
+  }
+
+  async updateCurrentUser(
+    userId: number,
+    updateCurrentUserDto: UpdateCurrentUserDto,
+  ): Promise<void> {
+    const user = await this.userRepository.preload({
+      id: userId,
+      ...updateCurrentUserDto,
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    await this.userRepository.save(user);
   }
 
   async getUsers({
