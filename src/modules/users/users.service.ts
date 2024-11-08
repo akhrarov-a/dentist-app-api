@@ -11,6 +11,7 @@ import { formatUserToReturn } from './utils';
 import { paginate } from '@core';
 import {
   CreateUserDto,
+  GetCurrentUserResponseDto,
   GetUsersFilterDto,
   GetUsersResponseDto,
   UpdateUserByIdDto,
@@ -25,12 +26,23 @@ export class UsersService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  async getCurrentUser(userId: number): Promise<UserToReturn> {
+  async getCurrentUser(userId: number): Promise<GetCurrentUserResponseDto> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
 
-    return formatUserToReturn(user);
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      phone: user.phone,
+      role: user.role,
+    };
   }
 
   async getUsers({

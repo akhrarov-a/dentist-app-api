@@ -16,6 +16,7 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '@core';
 import {
   CreateUserDto,
+  GetCurrentUserResponseDto,
   GetUsersFilterDto,
   GetUsersResponseDto,
   UpdateUserByIdDto,
@@ -37,10 +38,12 @@ export class UsersController {
   })
   @ApiOkResponse({
     description: 'Successfully get',
-    type: UserToReturn,
+    type: GetCurrentUserResponseDto,
   })
   @Get('/current')
-  getCurrentUser(@GetUser() user: UserEntity): Promise<UserToReturn> {
+  getCurrentUser(
+    @GetUser() user: UserEntity,
+  ): Promise<GetCurrentUserResponseDto> {
     return this.usersService.getCurrentUser(user.id);
   }
 
