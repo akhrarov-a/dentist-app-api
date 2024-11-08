@@ -18,6 +18,7 @@ import { GetUser } from '@users/utils';
 import { UserEntity } from '@users/user.entity';
 import {
   CreatePatientDto,
+  DeleteByIdsDto,
   GetPatientsFilterDto,
   GetPatientsResponseDto,
   UpdatePatientByIdDto,
@@ -114,5 +115,20 @@ export class PatientsController {
     @GetUser() user: UserEntity,
   ): Promise<void> {
     return this.patientsService.deletePatientById(id, user);
+  }
+
+  @ApiOperation({
+    summary: 'Request for deleting patients by ids',
+    description: 'If you want to delete patients by ids, use this request',
+  })
+  @ApiOkResponse({
+    description: 'Successfully deleted',
+  })
+  @Delete('/by/ids')
+  deletePatientsByIds(
+    @Body(ValidationPipe) deleteByIdsDto: DeleteByIdsDto,
+    @GetUser() user: UserEntity,
+  ): Promise<void> {
+    return this.patientsService.deletePatientsByIds(deleteByIdsDto, user);
   }
 }

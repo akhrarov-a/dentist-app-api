@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { UserEntity } from '@users/user.entity';
 import { paginate } from '@core';
 import {
   CreatePatientDto,
+  DeleteByIdsDto,
   GetPatientsFilterDto,
   GetPatientsResponseDto,
   UpdatePatientByIdDto,
@@ -106,6 +107,22 @@ export class PatientsService {
 
     if (result.affected === 0) {
       throw new NotFoundException(`Patient with id ${id} not found`);
+    }
+  }
+
+  async deletePatientsByIds(
+    deleteByIdsDto: DeleteByIdsDto,
+    user: UserEntity,
+  ): Promise<void> {
+    const result = await this.patientRepository.delete({
+      id: In(deleteByIdsDto.ids),
+      userId: user.id,
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        `Patients with ids ${deleteByIdsDto.ids.join(', ')} not found`,
+      );
     }
   }
 }
