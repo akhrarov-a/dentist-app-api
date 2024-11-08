@@ -53,6 +53,10 @@ export class AuthService {
     }
   }
 
+  async logout(): Promise<void> {
+    // TODO: implement logout delete refresh token
+  }
+
   private async generateAccessToken(email: string): Promise<string> {
     const payload: JwtPayload = { email };
 

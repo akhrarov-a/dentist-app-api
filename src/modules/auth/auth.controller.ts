@@ -1,4 +1,4 @@
-import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, ValidationPipe } from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
@@ -47,5 +47,15 @@ export class AuthController {
     @Body(ValidationPipe) refreshRequestDto: RefreshRequestDto,
   ): Promise<SignInResponseDto> {
     return this.authService.refreshAccessToken(refreshRequestDto.refreshToken);
+  }
+
+  @ApiOperation({
+    summary: 'Request for logout',
+    description: 'If you want to logout, use this request',
+  })
+  @ApiOkResponse({ description: 'Successfully logged out' })
+  @Get('logout')
+  logout(): Promise<void> {
+    return this.authService.logout();
   }
 }
