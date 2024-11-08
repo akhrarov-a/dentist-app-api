@@ -51,7 +51,7 @@ export class AppointmentsService {
 
     return {
       date,
-      data: appointmentsWithPatient,
+      appointments: appointmentsWithPatient,
     };
   }
 

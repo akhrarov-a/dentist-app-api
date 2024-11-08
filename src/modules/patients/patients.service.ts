@@ -42,8 +42,8 @@ export class PatientsService {
 
     const response: GetPatientsResponseDto = {
       data,
-      totalPatients: totalAmount,
-      totalPages: totalPages,
+      totalAmount,
+      totalPages,
     };
 
     if (page && perPage) {

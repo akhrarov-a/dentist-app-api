@@ -49,7 +49,7 @@ export class AuthService {
         refreshToken,
       };
     } catch {
-      throw new Error('Invalid refresh token');
+      throw new UnauthorizedException('Invalid refresh token');
     }
   }
 

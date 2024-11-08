@@ -1,4 +1,19 @@
 import { SelectQueryBuilder } from 'typeorm';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class Pagination {
+  @ApiProperty({ description: 'Total patients number' })
+  totalAmount: number;
+
+  @ApiProperty({ description: 'Total pages number' })
+  totalPages: number;
+
+  @ApiProperty({ description: 'Current page number' })
+  page?: number;
+
+  @ApiProperty({ description: 'Patient per page number' })
+  perPage?: number;
+}
 
 export const paginate = async <T>({
   query,

@@ -62,8 +62,8 @@ export class UsersService {
 
     const response: GetUsersResponseDto = {
       data: data.map(formatUserToReturn),
-      totalUsers: totalAmount,
-      totalPages: totalPages,
+      totalAmount,
+      totalPages,
     };
 
     if (page && perPage) {

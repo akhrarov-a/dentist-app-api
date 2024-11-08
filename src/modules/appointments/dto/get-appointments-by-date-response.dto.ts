@@ -9,5 +9,5 @@ export class GetAppointmentsByDateResponseDto {
     description: 'Appointments',
     type: [AppointmentResponseWithPatientDto],
   })
-  data: AppointmentResponseWithPatientDto[];
+  appointments: AppointmentResponseWithPatientDto[];
 }
