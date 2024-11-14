@@ -19,6 +19,7 @@ import { UserEntity } from '@users/user.entity';
 import {
   CreatePatientDto,
   DeleteByIdsDto,
+  FindPatientsByFirstnameOrLastnameDto,
   GetPatientsFilterDto,
   GetPatientsResponseDto,
   UpdatePatientByIdDto,
@@ -130,5 +131,26 @@ export class PatientsController {
     @GetUser() user: UserEntity,
   ): Promise<void> {
     return this.patientsService.deletePatientsByIds(deleteByIdsDto, user);
+  }
+
+  @ApiOperation({
+    summary: 'Request for finding patients by firstname or lastname',
+    description:
+      'If you want to find patients by firstname or lastname, use this request',
+  })
+  @ApiOkResponse({
+    description: 'Successfully get',
+    type: [PatientEntity],
+  })
+  @Get('/by/firstname-or-lastname')
+  findPatientsByFirstnameOrLastname(
+    @Query(ValidationPipe)
+    findPatientsByFirstnameOrLastnameDto: FindPatientsByFirstnameOrLastnameDto,
+    @GetUser() user: UserEntity,
+  ): Promise<PatientEntity[]> {
+    return this.patientsService.findPatientsByFirstNameOrLastName(
+      findPatientsByFirstnameOrLastnameDto,
+      user,
+    );
   }
 }

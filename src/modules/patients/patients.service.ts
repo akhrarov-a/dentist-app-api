@@ -6,6 +6,7 @@ import { paginate } from '@core';
 import {
   CreatePatientDto,
   DeleteByIdsDto,
+  FindPatientsByFirstnameOrLastnameDto,
   GetPatientsFilterDto,
   GetPatientsResponseDto,
   UpdatePatientByIdDto,
@@ -124,5 +125,24 @@ export class PatientsService {
         `Patients with ids ${deleteByIdsDto.ids.join(', ')} not found`,
       );
     }
+  }
+
+  async findPatientsByFirstNameOrLastName(
+    findPatientsByFirstnameOrLastnameDto: FindPatientsByFirstnameOrLastnameDto,
+    user: UserEntity,
+  ): Promise<PatientEntity[]> {
+    const query = this.patientRepository.createQueryBuilder('patient');
+
+    query.andWhere(`patient.userId = :userId`, { userId: user.id });
+
+    query.andWhere(`patient.firstname LIKE :search`, {
+      search: `%${findPatientsByFirstnameOrLastnameDto.search}%`,
+    });
+
+    query.orWhere(`patient.lastname LIKE :search`, {
+      search: `%${findPatientsByFirstnameOrLastnameDto.search}%`,
+    });
+
+    return (await query.getMany()).slice(0, 20);
   }
 }
