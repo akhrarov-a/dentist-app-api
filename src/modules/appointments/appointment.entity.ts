@@ -32,7 +32,7 @@ export class AppointmentEntity extends BaseEntity {
     description: 'Description of the appointment',
     required: false,
   })
-  @Column({ nullable: true })
+  @Column()
   description: string;
 
   @ApiProperty({ description: 'Created at time of the appointment' })
