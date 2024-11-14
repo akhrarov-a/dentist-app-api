@@ -28,10 +28,7 @@ export class AppointmentEntity extends BaseEntity {
   @Column()
   endTime: Date;
 
-  @ApiProperty({
-    description: 'Description of the appointment',
-    required: false,
-  })
+  @ApiProperty({ description: 'Description of the appointment' })
   @Column()
   description: string;
 

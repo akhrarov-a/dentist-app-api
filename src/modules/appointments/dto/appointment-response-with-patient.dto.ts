@@ -17,10 +17,7 @@ export class AppointmentResponseWithPatientDto {
   @ApiProperty({ description: 'End time of the appointment' })
   endTime: Date;
 
-  @ApiProperty({
-    description: 'Description of the appointment',
-    required: false,
-  })
+  @ApiProperty({ description: 'Description of the appointment' })
   description: string;
 
   @ApiProperty({ description: 'Created at time of the appointment' })

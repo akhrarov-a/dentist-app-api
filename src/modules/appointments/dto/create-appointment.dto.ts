@@ -16,10 +16,7 @@ export class CreateAppointmentDto {
   @IsDateString()
   endTime: Date;
 
-  @ApiProperty({
-    description: 'Description of an appointment',
-    required: false,
-  })
+  @ApiProperty({ description: 'Description of an appointment' })
   @IsNotEmpty()
   @IsString()
   description: string;
