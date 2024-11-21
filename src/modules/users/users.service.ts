@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { formatUserToReturn } from './utils';
-import { paginate } from '@core';
+import { paginate, Status } from '@core';
 import {
   CreateUserDto,
   GetCurrentUserResponseDto,
@@ -28,8 +28,9 @@ export class UsersService {
   ) {}
 
   async getCurrentUser(userId: number): Promise<GetCurrentUserResponseDto> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
+    const user = await this.userRepository.findOneBy({
+      id: userId,
+      status: Status.ACTIVE,
     });
 
     if (!user) {
@@ -50,16 +51,16 @@ export class UsersService {
     userId: number,
     updateCurrentUserDto: UpdateCurrentUserDto,
   ): Promise<void> {
-    const user = await this.userRepository.preload({
+    const user = await this.userRepository.findOneBy({
       id: userId,
-      ...updateCurrentUserDto,
+      status: Status.ACTIVE,
     });
 
     if (!user) {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
 
-    await this.userRepository.save(user);
+    await this.userRepository.save({ ...user, ...updateCurrentUserDto });
   }
 
   async getUsers({
@@ -68,6 +69,8 @@ export class UsersService {
     ...filterDto
   }: GetUsersFilterDto): Promise<GetUsersResponseDto> {
     const query = this.userRepository.createQueryBuilder('user');
+
+    query.andWhere('user.status = :status', { status: Status.ACTIVE });
 
     Object.entries(filterDto).forEach(([key, value]) => {
       if (!value) return;
@@ -104,7 +107,10 @@ export class UsersService {
   }
 
   async getUserById(id: number): Promise<UserToReturn> {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({
+      id,
+      status: Status.ACTIVE,
+    });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -123,6 +129,7 @@ export class UsersService {
     user.lastname = lastname;
     user.phone = phone;
     user.role = role;
+    user.status = Status.ACTIVE;
     user.email = email;
     user.description = description;
     user.salt = await bcrypt.genSalt();
@@ -145,24 +152,31 @@ export class UsersService {
     id: number,
     updateUserDto: UpdateUserByIdDto,
   ): Promise<UserToReturn> {
-    const user = await this.userRepository.preload({
+    const user = await this.userRepository.findOneBy({
       id,
-      ...updateUserDto,
+      status: Status.ACTIVE,
     });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    return formatUserToReturn(await this.userRepository.save(user));
+    return formatUserToReturn(
+      await this.userRepository.save({ ...user, ...updateUserDto }),
+    );
   }
 
   async deleteUserById(id: number): Promise<void> {
-    const result = await this.userRepository.delete(id);
+    const user = await this.userRepository.findOneBy({
+      id,
+      status: Status.ACTIVE,
+    });
 
-    if (result.affected === 0) {
+    if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
+
+    await this.userRepository.save({ ...user, status: Status.DELETED });
   }
 
   private async hashPassword(password: string, salt: string): Promise<string> {

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { UserEntity } from '@users/user.entity';
-import { paginate } from '@core';
+import { paginate, Status } from '@core';
 import {
   CreatePatientDto,
   DeleteByIdsDto,
@@ -27,6 +27,7 @@ export class PatientsService {
     const query = this.patientRepository.createQueryBuilder('patient');
 
     query.andWhere(`patient.userId = :userId`, { userId: user.id });
+    query.andWhere(`patient.status = :status`, { status: Status.ACTIVE });
 
     Object.entries(filterDto).forEach(([key, value]) => {
       if (!value) return;
@@ -60,6 +61,7 @@ export class PatientsService {
     const patient = await this.patientRepository.findOneBy({
       id,
       userId: user.id,
+      status: Status.ACTIVE,
     });
 
     if (!patient) {
@@ -83,6 +85,7 @@ export class PatientsService {
     patient.email = email;
     patient.description = description;
     patient.user = user;
+    patient.status = Status.ACTIVE;
 
     await patient.save();
 
@@ -104,27 +107,32 @@ export class PatientsService {
   }
 
   async deletePatientById(id: number, user: UserEntity): Promise<void> {
-    const result = await this.patientRepository.delete({ id, userId: user.id });
+    const patient = await this.getPatientById(id, user);
 
-    if (result.affected === 0) {
-      throw new NotFoundException(`Patient with id ${id} not found`);
-    }
+    await this.patientRepository.save({ ...patient, status: Status.DELETED });
   }
 
   async deletePatientsByIds(
     deleteByIdsDto: DeleteByIdsDto,
     user: UserEntity,
   ): Promise<void> {
-    const result = await this.patientRepository.delete({
+    const patients = await this.patientRepository.findBy({
       id: In(deleteByIdsDto.ids),
       userId: user.id,
+      status: Status.ACTIVE,
     });
 
-    if (result.affected === 0) {
+    if (!patients.length) {
       throw new NotFoundException(
         `Patients with ids ${deleteByIdsDto.ids.join(', ')} not found`,
       );
     }
+
+    patients.forEach((patient) => {
+      patient.status = Status.DELETED;
+    });
+
+    await this.patientRepository.save(patients);
   }
 
   async findPatientsByFirstNameOrLastName(
@@ -134,6 +142,7 @@ export class PatientsService {
     const query = this.patientRepository.createQueryBuilder('patient');
 
     query.andWhere(`patient.userId = :userId`, { userId: user.id });
+    query.andWhere(`patient.status = :status`, { status: Status.ACTIVE });
 
     query.andWhere(`patient.firstname LIKE :search`, {
       search: `%${findPatientsByFirstnameOrLastnameDto.search}%`,

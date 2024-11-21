@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Status } from '@core';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserEntity } from '@users/user.entity';
 
@@ -38,6 +39,13 @@ export class PatientEntity extends BaseEntity {
   })
   @Column({ nullable: true })
   description: string;
+
+  @ApiProperty({
+    description: 'The status of the patient',
+    required: false,
+  })
+  @Column()
+  status: Status;
 
   @ApiProperty({ description: 'Created date and time of the patient' })
   @CreateDateColumn()

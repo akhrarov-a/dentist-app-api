@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Status } from '@core';
 import { PatientEntity } from '@patients/patient.entity';
 import { AppointmentEntity } from '@appointments/appointment.entity';
 import { UserRole } from './types';
@@ -42,6 +43,9 @@ export class UserEntity extends BaseEntity {
 
   @Column()
   role: UserRole;
+
+  @Column()
+  status: Status;
 
   @CreateDateColumn()
   createdAt: Date;
