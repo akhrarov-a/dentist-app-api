@@ -57,7 +57,7 @@ export class GetUsersFilterDto {
   @IsNumberString()
   page: number;
 
-  @ApiProperty({ description: 'User per page number', required: false })
+  @ApiProperty({ description: 'Per page number', required: false })
   @IsOptional()
   @IsNumberString()
   perPage: number;

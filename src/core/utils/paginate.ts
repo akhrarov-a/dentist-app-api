@@ -11,7 +11,7 @@ export class Pagination {
   @ApiProperty({ description: 'Current page number' })
   page?: number;
 
-  @ApiProperty({ description: 'Patient per page number' })
+  @ApiProperty({ description: 'Per page number' })
   perPage?: number;
 }
 

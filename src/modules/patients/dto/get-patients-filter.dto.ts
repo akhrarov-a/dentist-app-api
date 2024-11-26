@@ -46,7 +46,7 @@ export class GetPatientsFilterDto {
   @IsNumberString()
   page: number;
 
-  @ApiProperty({ description: 'Patient per page number', required: false })
+  @ApiProperty({ description: 'Per page number', required: false })
   @IsOptional()
   @IsNumberString()
   perPage: number;

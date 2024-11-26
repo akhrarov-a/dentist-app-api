@@ -12,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { Status } from '@core';
 import { PatientEntity } from '@patients/patient.entity';
 import { AppointmentEntity } from '@appointments/appointment.entity';
+import { ServiceEntity } from '@services/service.entity';
 import { UserRole } from './types';
 
 @Entity('users')
@@ -60,6 +61,11 @@ export class UserEntity extends BaseEntity {
     eager: true,
   })
   appointments: AppointmentEntity[];
+
+  @OneToMany(() => ServiceEntity, (service) => service.user, {
+    eager: true,
+  })
+  services: ServiceEntity[];
 
   async validatePassword(password: string): Promise<boolean> {
     const hash = await bcrypt.hash(password, this.salt);
