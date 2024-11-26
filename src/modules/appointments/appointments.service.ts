@@ -8,13 +8,16 @@ import { Repository } from 'typeorm';
 import { paginate } from '@core';
 import { UserEntity } from '@users/user.entity';
 import { PatientsService } from '@patients/patients.service';
+import { ServicesService } from '@services/services.service';
 import { AppointmentEntity } from './appointment.entity';
 import {
-  AppointmentResponseWithPatientDto,
+  AppointmentResponseWithPatientAndServiceDto,
   CreateAppointmentDto,
   GetAppointmentsByDateResponseDto,
   GetAppointmentsByPatientDto,
   GetAppointmentsByPatientResponseDto,
+  GetAppointmentsByServiceDto,
+  GetAppointmentsByServiceResponseDto,
   UpdateAppointmentDto,
 } from './dto';
 
@@ -22,6 +25,7 @@ import {
 export class AppointmentsService {
   constructor(
     private readonly patientsService: PatientsService,
+    private readonly servicesService: ServicesService,
     @InjectRepository(AppointmentEntity)
     private readonly appointmentRepository: Repository<AppointmentEntity>,
   ) {}
@@ -48,12 +52,52 @@ export class AppointmentsService {
 
     const appointmentsWithPatient = await Promise.all(
       data.map((appointment) =>
-        this.appointmentResponseWithPatient(appointment, user),
+        this.appointmentResponseWithPatientAndService(appointment, user),
       ),
     );
 
     const response: GetAppointmentsByPatientResponseDto = {
       data: appointmentsWithPatient,
+      totalAmount,
+      totalPages,
+    };
+
+    if (page && perPage) {
+      response.page = +page;
+      response.perPage = +perPage;
+    }
+
+    return response;
+  }
+
+  async getAppointmentsByService(
+    { service, page, perPage }: GetAppointmentsByServiceDto,
+    user: UserEntity,
+  ): Promise<GetAppointmentsByServiceResponseDto> {
+    const query = this.appointmentRepository.createQueryBuilder('appointment');
+
+    query.andWhere('appointment.userId = :userId', { userId: user.id });
+
+    query.andWhere('appointment.serviceId >= :serviceId', {
+      serviceId: service,
+    });
+
+    const { totalAmount, totalPages, data } = await paginate<AppointmentEntity>(
+      {
+        query,
+        page,
+        perPage,
+      },
+    );
+
+    const appointmentsWithPatientAndService = await Promise.all(
+      data.map((appointment) =>
+        this.appointmentResponseWithPatientAndService(appointment, user),
+      ),
+    );
+
+    const response: GetAppointmentsByServiceResponseDto = {
+      data: appointmentsWithPatientAndService,
       totalAmount,
       totalPages,
     };
@@ -88,7 +132,7 @@ export class AppointmentsService {
 
     const appointmentsWithPatient = await Promise.all(
       appointments.map((appointment) =>
-        this.appointmentResponseWithPatient(appointment, user),
+        this.appointmentResponseWithPatientAndService(appointment, user),
       ),
     );
 
@@ -101,7 +145,7 @@ export class AppointmentsService {
   async getAppointmentById(
     id: number,
     user: UserEntity,
-  ): Promise<AppointmentResponseWithPatientDto> {
+  ): Promise<AppointmentResponseWithPatientAndServiceDto> {
     const appointment = await this.appointmentRepository.findOneBy({
       id,
       userId: user.id,
@@ -111,14 +155,15 @@ export class AppointmentsService {
       throw new NotFoundException(`Appointment with id ${id} not found`);
     }
 
-    return this.appointmentResponseWithPatient(appointment, user);
+    return this.appointmentResponseWithPatientAndService(appointment, user);
   }
 
   async createAppointment(
     createAppointmentDto: CreateAppointmentDto,
     user: UserEntity,
-  ): Promise<AppointmentResponseWithPatientDto> {
-    const { patientId, startTime, endTime, description } = createAppointmentDto;
+  ): Promise<AppointmentResponseWithPatientAndServiceDto> {
+    const { patientId, serviceId, startTime, endTime, description } =
+      createAppointmentDto;
 
     // check for patient exists
     await this.patientsService.getPatientById(patientId, user);
@@ -129,6 +174,7 @@ export class AppointmentsService {
     const appointment = new AppointmentEntity();
 
     appointment.patientId = patientId;
+    appointment.serviceId = serviceId;
     appointment.startTime = startTime;
     appointment.endTime = endTime;
     appointment.description = description;
@@ -138,14 +184,14 @@ export class AppointmentsService {
 
     delete appointment.user;
 
-    return this.appointmentResponseWithPatient(appointment, user);
+    return this.appointmentResponseWithPatientAndService(appointment, user);
   }
 
   async updateAppointmentById(
     id: number,
     updateAppointmentDto: UpdateAppointmentDto,
     user: UserEntity,
-  ): Promise<AppointmentResponseWithPatientDto> {
+  ): Promise<AppointmentResponseWithPatientAndServiceDto> {
     const appointment = await this.appointmentRepository.findOneBy({
       id,
       userId: user.id,
@@ -155,17 +201,25 @@ export class AppointmentsService {
       throw new NotFoundException(`Appointment with id ${id} not found`);
     }
 
-    const { startTime, endTime, patientId, description } = updateAppointmentDto;
+    const { startTime, endTime, patientId, serviceId, description } =
+      updateAppointmentDto;
 
     if (description) {
       appointment.description = description;
     }
 
     if (patientId) {
-      // check for patient exists
+      // check for service exists
       await this.patientsService.getPatientById(patientId, user);
 
       appointment.patientId = patientId;
+    }
+
+    if (serviceId) {
+      // check for patient exists
+      await this.servicesService.getServiceById(serviceId, user);
+
+      appointment.serviceId = serviceId;
     }
 
     if (startTime || endTime) {
@@ -179,7 +233,7 @@ export class AppointmentsService {
       appointment.endTime = _endTime;
     }
 
-    return this.appointmentResponseWithPatient(
+    return this.appointmentResponseWithPatientAndService(
       await this.appointmentRepository.save(appointment),
       user,
     );
@@ -196,15 +250,17 @@ export class AppointmentsService {
     }
   }
 
-  private async appointmentResponseWithPatient(
-    { patientId, ...appointment }: AppointmentEntity,
+  private async appointmentResponseWithPatientAndService(
+    { patientId, serviceId, ...appointment }: AppointmentEntity,
     user: UserEntity,
-  ): Promise<AppointmentResponseWithPatientDto> {
+  ): Promise<AppointmentResponseWithPatientAndServiceDto> {
     const patient = await this.patientsService.getPatientById(patientId, user);
+    const service = await this.servicesService.getServiceById(serviceId, user);
 
     return {
       ...appointment,
       patient,
+      service,
     };
   }
 

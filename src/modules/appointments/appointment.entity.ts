@@ -20,6 +20,10 @@ export class AppointmentEntity extends BaseEntity {
   @Column()
   patientId: number;
 
+  @ApiProperty({ description: 'Selected service for the appointment' })
+  @Column()
+  serviceId: number;
+
   @ApiProperty({ description: 'Start time of the appointment' })
   @Column()
   startTime: Date;

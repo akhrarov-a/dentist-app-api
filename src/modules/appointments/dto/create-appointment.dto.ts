@@ -6,6 +6,10 @@ export class CreateAppointmentDto {
   @IsNumber()
   patientId: number;
 
+  @ApiProperty({ description: 'Selected service for an appointment' })
+  @IsNumber()
+  serviceId: number;
+
   @ApiProperty({ description: 'Start time of an appointment' })
   @IsNotEmpty()
   @IsDateString()

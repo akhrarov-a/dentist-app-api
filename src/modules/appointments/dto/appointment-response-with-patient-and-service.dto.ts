@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PatientEntity } from '@patients/patient.entity';
+import { ServiceEntity } from '@services/service.entity';
 
-export class AppointmentResponseWithPatientDto {
+export class AppointmentResponseWithPatientAndServiceDto {
   @ApiProperty({ description: 'ID of the appointment' })
   id: number;
 
@@ -10,6 +11,12 @@ export class AppointmentResponseWithPatientDto {
     type: PatientEntity,
   })
   patient: PatientEntity;
+
+  @ApiProperty({
+    description: 'Selected service for the appointment',
+    type: ServiceEntity,
+  })
+  service: ServiceEntity;
 
   @ApiProperty({ description: 'Start time of the appointment' })
   startTime: Date;

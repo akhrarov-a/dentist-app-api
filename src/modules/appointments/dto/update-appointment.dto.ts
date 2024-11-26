@@ -16,6 +16,14 @@ export class UpdateAppointmentDto {
   @IsNumber()
   patientId: number;
 
+  @ApiProperty({
+    description: 'Selected service for an appointment',
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  serviceId: number;
+
   @ApiProperty({ description: 'Start time of an appointment', required: false })
   @IsOptional()
   @IsNotEmpty()

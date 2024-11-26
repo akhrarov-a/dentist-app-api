@@ -1,13 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Pagination } from '@core';
 import { AppointmentResponseWithPatientAndServiceDto } from './appointment-response-with-patient-and-service.dto';
 
-export class GetAppointmentsByDateResponseDto {
-  @ApiProperty({ description: 'Selected date' })
-  date: string;
-
+export class GetAppointmentsByServiceResponseDto extends Pagination {
   @ApiProperty({
     description: 'Appointments',
     type: [AppointmentResponseWithPatientAndServiceDto],
   })
-  appointments: AppointmentResponseWithPatientAndServiceDto[];
+  data: AppointmentResponseWithPatientAndServiceDto[];
 }
