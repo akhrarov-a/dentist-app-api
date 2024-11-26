@@ -78,9 +78,10 @@ export class AppointmentsService {
 
     query.andWhere('appointment.userId = :userId', { userId: user.id });
 
-    query.andWhere('appointment.serviceId >= :serviceId', {
-      serviceId: service,
-    });
+    query.andWhere(
+      "EXISTS (SELECT 1 FROM jsonb_array_elements(appointment.services) AS service WHERE (service->>'id')::int = ANY(:services))",
+      { services: [service] },
+    );
 
     const { totalAmount, totalPages, data } = await paginate<AppointmentEntity>(
       {
@@ -260,9 +261,17 @@ export class AppointmentsService {
   ): Promise<AppointmentResponseWithPatientAndServiceDto> {
     const patient = await this.patientsService.getPatientById(patientId, user);
     const results = await Promise.all(
-      services.map((serviceDto) =>
-        this.servicesService.getServiceById(serviceDto.id, user),
-      ),
+      services.map(async (serviceDto) => {
+        const service = await this.servicesService.getServiceById(
+          serviceDto.id,
+          user,
+        );
+
+        return {
+          service,
+          description: serviceDto.description,
+        };
+      }),
     );
 
     return {
