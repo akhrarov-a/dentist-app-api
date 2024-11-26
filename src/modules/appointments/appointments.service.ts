@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { paginate } from '@core';
 import { UserEntity } from '@users/user.entity';
 import { PatientsService } from '@patients/patients.service';
 import { AppointmentEntity } from './appointment.entity';
@@ -12,6 +13,7 @@ import {
   AppointmentResponseWithPatientDto,
   CreateAppointmentDto,
   GetAppointmentsByDateResponseDto,
+  GetAppointmentsByPatientDto,
   GetAppointmentsByPatientResponseDto,
   UpdateAppointmentDto,
 } from './dto';
@@ -25,26 +27,43 @@ export class AppointmentsService {
   ) {}
 
   async getAppointmentsByPatient(
-    patientId: number,
+    { patient, page, perPage }: GetAppointmentsByPatientDto,
     user: UserEntity,
   ): Promise<GetAppointmentsByPatientResponseDto> {
     const query = this.appointmentRepository.createQueryBuilder('appointment');
 
     query.andWhere('appointment.userId = :userId', { userId: user.id });
 
-    query.andWhere('appointment.patientId >= :patientId', { patientId });
+    query.andWhere('appointment.patientId >= :patientId', {
+      patientId: patient,
+    });
 
-    const appointments = await query.getMany();
+    const { totalAmount, totalPages, data } = await paginate<AppointmentEntity>(
+      {
+        query,
+        page,
+        perPage,
+      },
+    );
 
     const appointmentsWithPatient = await Promise.all(
-      appointments.map((appointment) =>
+      data.map((appointment) =>
         this.appointmentResponseWithPatient(appointment, user),
       ),
     );
 
-    return {
-      appointments: appointmentsWithPatient,
+    const response: GetAppointmentsByPatientResponseDto = {
+      data: appointmentsWithPatient,
+      totalAmount,
+      totalPages,
     };
+
+    if (page && perPage) {
+      response.page = +page;
+      response.perPage = +perPage;
+    }
+
+    return response;
   }
 
   async getAppointmentsByDate(

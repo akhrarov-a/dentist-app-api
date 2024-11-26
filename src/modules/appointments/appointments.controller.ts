@@ -25,6 +25,7 @@ import {
   AppointmentResponseWithPatientDto,
   CreateAppointmentDto,
   GetAppointmentsByDateResponseDto,
+  GetAppointmentsByPatientDto,
   GetAppointmentsByPatientResponseDto,
   UpdateAppointmentDto,
 } from './dto';
@@ -51,10 +52,14 @@ export class AppointmentsController {
   })
   @Get('/by/patient')
   getAppointmentsByPatient(
-    @Query('patient', ParseIntPipe) patient: number,
+    @Query(ValidationPipe)
+    getAppointmentsByPatientDto: GetAppointmentsByPatientDto,
     @GetUser() user: UserEntity,
   ): Promise<GetAppointmentsByPatientResponseDto> {
-    return this.appointmentsService.getAppointmentsByPatient(patient, user);
+    return this.appointmentsService.getAppointmentsByPatient(
+      getAppointmentsByPatientDto,
+      user,
+    );
   }
 
   @ApiOperation({
