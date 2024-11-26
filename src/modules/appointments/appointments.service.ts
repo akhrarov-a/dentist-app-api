@@ -12,6 +12,7 @@ import {
   AppointmentResponseWithPatientDto,
   CreateAppointmentDto,
   GetAppointmentsByDateResponseDto,
+  GetAppointmentsByPatientResponseDto,
   UpdateAppointmentDto,
 } from './dto';
 
@@ -22,6 +23,29 @@ export class AppointmentsService {
     @InjectRepository(AppointmentEntity)
     private readonly appointmentRepository: Repository<AppointmentEntity>,
   ) {}
+
+  async getAppointmentsByPatient(
+    patientId: number,
+    user: UserEntity,
+  ): Promise<GetAppointmentsByPatientResponseDto> {
+    const query = this.appointmentRepository.createQueryBuilder('appointment');
+
+    query.andWhere('appointment.userId = :userId', { userId: user.id });
+
+    query.andWhere('appointment.patientId >= :patientId', { patientId });
+
+    const appointments = await query.getMany();
+
+    const appointmentsWithPatient = await Promise.all(
+      appointments.map((appointment) =>
+        this.appointmentResponseWithPatient(appointment, user),
+      ),
+    );
+
+    return {
+      appointments: appointmentsWithPatient,
+    };
+  }
 
   async getAppointmentsByDate(
     date: string,

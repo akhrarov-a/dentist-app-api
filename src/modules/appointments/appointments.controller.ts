@@ -25,6 +25,7 @@ import {
   AppointmentResponseWithPatientDto,
   CreateAppointmentDto,
   GetAppointmentsByDateResponseDto,
+  GetAppointmentsByPatientResponseDto,
   UpdateAppointmentDto,
 } from './dto';
 import { AppointmentsService } from './appointments.service';
@@ -34,6 +35,27 @@ import { AppointmentsService } from './appointments.service';
 @UseGuards(AuthGuard(), DentistGuard)
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
+
+  @ApiOperation({
+    summary: 'Request for getting appointments by patient id',
+    description:
+      'If you want to get appointments by patient id, use this request',
+  })
+  @ApiOkResponse({
+    description: 'Successfully get',
+    type: GetAppointmentsByPatientResponseDto,
+  })
+  @ApiQuery({
+    name: 'patient',
+    required: true,
+  })
+  @Get('/by/patient')
+  getAppointmentsByPatient(
+    @Query('patient', ParseIntPipe) patient: number,
+    @GetUser() user: UserEntity,
+  ): Promise<GetAppointmentsByPatientResponseDto> {
+    return this.appointmentsService.getAppointmentsByPatient(patient, user);
+  }
 
   @ApiOperation({
     summary: 'Request for getting appointments by date',
@@ -49,7 +71,7 @@ export class AppointmentsController {
     description:
       'Date for which to retrieve appointments in "YYYY-MM-DD" format.',
   })
-  @Get()
+  @Get('/by/date')
   getAppointmentsByDate(
     @Query('date') date: string,
     @GetUser() user: UserEntity,
