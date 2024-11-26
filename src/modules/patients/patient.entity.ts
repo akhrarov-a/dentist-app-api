@@ -21,8 +21,8 @@ export class PatientEntity extends BaseEntity {
   @Column()
   firstname: string;
 
-  @ApiProperty({ description: 'The lastname of the patient' })
-  @Column()
+  @ApiProperty({ description: 'The lastname of the patient', required: false })
+  @Column({ nullable: true })
   lastname: string;
 
   @ApiProperty({ description: 'The phone of the patient' })

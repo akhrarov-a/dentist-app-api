@@ -13,7 +13,8 @@ export class CreatePatientDto {
   @IsString()
   firstname: string;
 
-  @ApiProperty({ description: 'Lastname of the patient' })
+  @ApiProperty({ description: 'Lastname of the patient', required: false })
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
   lastname: string;
