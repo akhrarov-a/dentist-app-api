@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserEntity } from '@users/user.entity';
+import { ServiceDto } from './dto';
 
 @Entity('appointments')
 export class AppointmentEntity extends BaseEntity {
@@ -20,9 +21,12 @@ export class AppointmentEntity extends BaseEntity {
   @Column()
   patientId: number;
 
-  @ApiProperty({ description: 'Selected service for the appointment' })
-  @Column()
-  serviceId: number;
+  @ApiProperty({
+    description: 'Selected services for the appointment',
+    type: [ServiceDto],
+  })
+  @Column('jsonb')
+  services: ServiceDto[];
 
   @ApiProperty({ description: 'Start time of the appointment' })
   @Column()

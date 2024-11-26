@@ -13,10 +13,10 @@ export class AppointmentResponseWithPatientAndServiceDto {
   patient: PatientEntity;
 
   @ApiProperty({
-    description: 'Selected service for the appointment',
-    type: ServiceEntity,
+    description: 'Selected services for the appointment',
+    type: [ServiceEntity],
   })
-  service: ServiceEntity;
+  services: ServiceEntity[];
 
   @ApiProperty({ description: 'Start time of the appointment' })
   startTime: Date;

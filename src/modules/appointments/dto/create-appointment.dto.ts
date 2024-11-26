@@ -1,14 +1,30 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { ServiceDto } from './service.dto';
 
 export class CreateAppointmentDto {
   @ApiProperty({ description: 'Selected patient for an appointment' })
   @IsNumber()
   patientId: number;
 
-  @ApiProperty({ description: 'Selected service for an appointment' })
-  @IsNumber()
-  serviceId: number;
+  @ApiProperty({
+    description: 'Selected services for an appointment',
+    type: [ServiceDto],
+  })
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => ServiceDto)
+  services: ServiceDto[];
 
   @ApiProperty({ description: 'Start time of an appointment' })
   @IsNotEmpty()

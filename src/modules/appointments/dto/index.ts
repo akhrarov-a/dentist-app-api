@@ -6,3 +6,4 @@ export * from './get-appointments-by-patient.dto';
 export * from './get-appointments-by-patient-response.dto';
 export * from './get-appointments-by-service.dto';
 export * from './get-appointments-by-service-response.dto';
+export * from './service.dto';

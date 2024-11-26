@@ -162,7 +162,7 @@ export class AppointmentsService {
     createAppointmentDto: CreateAppointmentDto,
     user: UserEntity,
   ): Promise<AppointmentResponseWithPatientAndServiceDto> {
-    const { patientId, serviceId, startTime, endTime, description } =
+    const { patientId, services, startTime, endTime, description } =
       createAppointmentDto;
 
     // check for patient exists
@@ -174,7 +174,7 @@ export class AppointmentsService {
     const appointment = new AppointmentEntity();
 
     appointment.patientId = patientId;
-    appointment.serviceId = serviceId;
+    appointment.services = services;
     appointment.startTime = startTime;
     appointment.endTime = endTime;
     appointment.description = description;
@@ -201,7 +201,7 @@ export class AppointmentsService {
       throw new NotFoundException(`Appointment with id ${id} not found`);
     }
 
-    const { startTime, endTime, patientId, serviceId, description } =
+    const { startTime, endTime, patientId, services, description } =
       updateAppointmentDto;
 
     if (description) {
@@ -209,17 +209,21 @@ export class AppointmentsService {
     }
 
     if (patientId) {
-      // check for service exists
+      // check for patient exists
       await this.patientsService.getPatientById(patientId, user);
 
       appointment.patientId = patientId;
     }
 
-    if (serviceId) {
-      // check for patient exists
-      await this.servicesService.getServiceById(serviceId, user);
+    if (!!services?.length) {
+      // check for services exist
+      await Promise.all(
+        services.map((serviceDto) =>
+          this.servicesService.getServiceById(serviceDto.id, user),
+        ),
+      );
 
-      appointment.serviceId = serviceId;
+      appointment.services = services;
     }
 
     if (startTime || endTime) {
@@ -251,16 +255,20 @@ export class AppointmentsService {
   }
 
   private async appointmentResponseWithPatientAndService(
-    { patientId, serviceId, ...appointment }: AppointmentEntity,
+    { patientId, services, ...appointment }: AppointmentEntity,
     user: UserEntity,
   ): Promise<AppointmentResponseWithPatientAndServiceDto> {
     const patient = await this.patientsService.getPatientById(patientId, user);
-    const service = await this.servicesService.getServiceById(serviceId, user);
+    const results = await Promise.all(
+      services.map((serviceDto) =>
+        this.servicesService.getServiceById(serviceDto.id, user),
+      ),
+    );
 
     return {
       ...appointment,
       patient,
-      service,
+      services: results,
     };
   }
 
