@@ -3,13 +3,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Status } from '@core';
 import { ApiProperty } from '@nestjs/swagger';
+import { Status } from '@core';
 import { UserEntity } from '@users/user.entity';
+import { AppointmentServiceEntity } from '@appointments/appointment-service.entity';
 
 @Entity('services')
 export class ServiceEntity extends BaseEntity {
@@ -18,29 +21,30 @@ export class ServiceEntity extends BaseEntity {
   id: number;
 
   @ApiProperty({ description: 'The name of the service' })
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @ApiProperty({
-    description: 'The status of the service',
-    required: false,
-    enum: [Status.ACTIVE, Status.DISABLED],
-  })
-  @Column()
+  @Column({ type: 'enum', enum: Status, default: Status.ACTIVE })
   status: Status;
 
   @ApiProperty({ description: 'Created date and time of the service' })
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @ApiProperty({ description: 'Updated date and time of the service' })
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.services, { eager: false })
+  @ManyToOne(() => UserEntity, (user) => user.services, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
-  @ApiProperty({ description: 'The owner of the service' })
-  @Column()
-  userId: number;
+  @OneToMany(
+    () => AppointmentServiceEntity,
+    (appointmentService) => appointmentService.service,
+    { onDelete: 'CASCADE' },
+  )
+  appointmentServices: AppointmentServiceEntity[];
 }

@@ -9,11 +9,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Status } from '@core';
+import { Status, UserRole } from '@core';
 import { PatientEntity } from '@patients/patient.entity';
 import { AppointmentEntity } from '@appointments/appointment.entity';
 import { ServiceEntity } from '@services/service.entity';
-import { UserRole } from './types';
+import { AppointmentServiceEntity } from '@appointments/appointment-service.entity';
 
 @Entity('users')
 @Unique(['email'])
@@ -21,51 +21,62 @@ export class UserEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   firstname: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   lastname: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 20 })
   phone: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   email: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   password: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   salt: string;
 
-  @Column()
+  @Column({ type: 'enum', enum: UserRole })
   role: UserRole;
 
-  @Column()
+  @Column({ type: 'enum', enum: Status, default: Status.ACTIVE })
   status: Status;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 
-  @OneToMany(() => PatientEntity, (patient) => patient.user, { eager: true })
+  @OneToMany(() => PatientEntity, (patient) => patient.user, {
+    onDelete: 'CASCADE',
+  })
   patients: PatientEntity[];
 
   @OneToMany(() => AppointmentEntity, (appointment) => appointment.user, {
-    eager: true,
+    onDelete: 'CASCADE',
   })
   appointments: AppointmentEntity[];
 
   @OneToMany(() => ServiceEntity, (service) => service.user, {
-    eager: true,
+    onDelete: 'CASCADE',
   })
   services: ServiceEntity[];
+
+  @OneToMany(
+    () => AppointmentServiceEntity,
+    (appointmentService) => appointmentService.user,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  appointment_services: AppointmentServiceEntity[];
 
   async validatePassword(password: string): Promise<boolean> {
     const hash = await bcrypt.hash(password, this.salt);

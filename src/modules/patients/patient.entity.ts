@@ -3,13 +3,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Status } from '@core';
 import { ApiProperty } from '@nestjs/swagger';
+import { Status } from '@core';
 import { UserEntity } from '@users/user.entity';
+import { AppointmentEntity } from '@appointments/appointment.entity';
 
 @Entity('patients')
 export class PatientEntity extends BaseEntity {
@@ -18,47 +21,45 @@ export class PatientEntity extends BaseEntity {
   id: number;
 
   @ApiProperty({ description: 'The firstname of the patient' })
-  @Column()
+  @Column({ type: 'varchar', length: 255 })
   firstname: string;
 
   @ApiProperty({ description: 'The lastname of the patient', required: false })
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   lastname: string;
 
   @ApiProperty({ description: 'The phone of the patient' })
-  @Column()
+  @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string;
 
   @ApiProperty({ description: 'The email of the patient' })
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   email: string;
 
   @ApiProperty({
     description: 'The description of the patient',
     required: false,
   })
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   description: string;
 
-  @ApiProperty({
-    description: 'The status of the patient',
-    required: false,
-  })
-  @Column()
+  @Column({ type: 'enum', enum: Status, default: Status.ACTIVE })
   status: Status;
 
   @ApiProperty({ description: 'Created date and time of the patient' })
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @ApiProperty({ description: 'Updated date and time of the patient' })
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.patients, { eager: false })
+  @ManyToOne(() => UserEntity, (user) => user.patients, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
-  @ApiProperty({ description: 'The owner of the patient' })
-  @Column()
-  userId: number;
+  @OneToMany(() => AppointmentEntity, (appointment) => appointment.patient, {
+    onDelete: 'CASCADE',
+  })
+  appointments: AppointmentEntity[];
 }

@@ -2,9 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { UserEntity } from '@users/user.entity';
-import { paginate } from '@core';
+import { paginate, Status } from '@core';
 import {
   CreateServiceDto,
+  CreateServiceResponseDto,
   DeleteByIdsDto,
   GetServicesFilterDto,
   GetServicesResponseDto,
@@ -25,7 +26,10 @@ export class ServicesService {
   ): Promise<GetServicesResponseDto> {
     const query = this.serviceRepository.createQueryBuilder('service');
 
-    query.andWhere(`service.userId = :userId`, { userId: user.id });
+    query
+      .leftJoinAndSelect('service.user', 'user')
+      .andWhere(`user.id = :userId`, { userId: user.id })
+      .andWhere(`service.status = :status`, { status: Status.ACTIVE });
 
     Object.entries(filterDto).forEach(([key, value]) => {
       if (!value) return;
@@ -55,10 +59,30 @@ export class ServicesService {
     return response;
   }
 
+  async getServicesByIds(
+    ids: number[],
+    user: UserEntity,
+  ): Promise<ServiceEntity[]> {
+    const services = await this.serviceRepository.findBy({
+      id: In(ids),
+      status: Status.ACTIVE,
+      user: { id: user.id },
+    });
+
+    if (!services.length) {
+      throw new NotFoundException(
+        `Services with ids ${ids.join(', ')} not found`,
+      );
+    }
+
+    return services;
+  }
+
   async getServiceById(id: number, user: UserEntity): Promise<ServiceEntity> {
     const service = await this.serviceRepository.findOneBy({
       id,
-      userId: user.id,
+      user: { id: user.id },
+      status: Status.ACTIVE,
     });
 
     if (!service) {
@@ -71,13 +95,13 @@ export class ServicesService {
   async createService(
     createServiceDto: CreateServiceDto,
     user: UserEntity,
-  ): Promise<Pick<ServiceEntity, 'id'>> {
-    const { name, status } = createServiceDto;
+  ): Promise<CreateServiceResponseDto> {
+    const { name } = createServiceDto;
 
     const service = new ServiceEntity();
 
     service.name = name;
-    service.status = status;
+    service.status = Status.ACTIVE;
     service.user = user;
 
     await service.save();
@@ -100,26 +124,31 @@ export class ServicesService {
   }
 
   async deleteServiceById(id: number, user: UserEntity): Promise<void> {
-    const result = await this.serviceRepository.delete({ id, userId: user.id });
+    const service = await this.getServiceById(id, user);
 
-    if (!result.affected) {
-      throw new NotFoundException(`Service with id ${id} not found`);
-    }
+    await this.serviceRepository.save({ ...service, status: Status.DELETED });
   }
 
   async deleteServicesByIds(
     deleteByIdsDto: DeleteByIdsDto,
     user: UserEntity,
   ): Promise<void> {
-    const services = await this.serviceRepository.delete({
+    const services = await this.serviceRepository.findBy({
       id: In(deleteByIdsDto.ids),
-      userId: user.id,
+      status: Status.ACTIVE,
+      user: { id: user.id },
     });
 
-    if (!services.affected) {
+    if (!services.length) {
       throw new NotFoundException(
         `Services with ids ${deleteByIdsDto.ids.join(', ')} not found`,
       );
     }
+
+    services.forEach((service) => {
+      service.status = Status.DELETED;
+    });
+
+    await this.serviceRepository.save(services);
   }
 }

@@ -5,12 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { formatUserToReturn } from './utils';
 import { paginate, Status } from '@core';
 import {
   CreateUserDto,
+  CreateUserResponseDto,
+  DeleteByIdsDto,
   GetCurrentUserResponseDto,
   GetUsersFilterDto,
   GetUsersResponseDto,
@@ -70,8 +72,6 @@ export class UsersService {
   }: GetUsersFilterDto): Promise<GetUsersResponseDto> {
     const query = this.userRepository.createQueryBuilder('user');
 
-    query.andWhere('user.status = :status', { status: Status.ACTIVE });
-
     Object.entries(filterDto).forEach(([key, value]) => {
       if (!value) return;
 
@@ -107,10 +107,7 @@ export class UsersService {
   }
 
   async getUserById(id: number): Promise<UserToReturn> {
-    const user = await this.userRepository.findOneBy({
-      id,
-      status: Status.ACTIVE,
-    });
+    const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -119,7 +116,9 @@ export class UsersService {
     return formatUserToReturn(user);
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<UserToReturn> {
+  async createUser(
+    createUserDto: CreateUserDto,
+  ): Promise<CreateUserResponseDto> {
     const { firstname, lastname, phone, password, role, email, description } =
       createUserDto;
 
@@ -127,13 +126,13 @@ export class UsersService {
 
     user.firstname = firstname;
     user.lastname = lastname;
+    user.description = description;
     user.phone = phone;
+    user.email = email;
+    user.password = await this.hashPassword(password, user.salt);
+    user.salt = await bcrypt.genSalt();
     user.role = role;
     user.status = Status.ACTIVE;
-    user.email = email;
-    user.description = description;
-    user.salt = await bcrypt.genSalt();
-    user.password = await this.hashPassword(password, user.salt);
 
     try {
       await user.save();
@@ -145,38 +144,55 @@ export class UsersService {
       }
     }
 
-    return formatUserToReturn(user);
+    return {
+      id: user.id,
+    };
   }
 
   async updateUserById(
     id: number,
     updateUserDto: UpdateUserByIdDto,
-  ): Promise<UserToReturn> {
-    const user = await this.userRepository.findOneBy({
-      id,
-      status: Status.ACTIVE,
-    });
+  ): Promise<void> {
+    const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    return formatUserToReturn(
-      await this.userRepository.save({ ...user, ...updateUserDto }),
-    );
+    Object.keys(updateUserDto).map((key) => {
+      user[key] = updateUserDto[key];
+    });
+
+    await this.userRepository.save(user);
   }
 
   async deleteUserById(id: number): Promise<void> {
-    const user = await this.userRepository.findOneBy({
-      id,
-      status: Status.ACTIVE,
-    });
+    const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
     await this.userRepository.save({ ...user, status: Status.DELETED });
+  }
+
+  async deleteUsersByIds(deleteByIdsDto: DeleteByIdsDto): Promise<void> {
+    const users = await this.userRepository.findBy({
+      id: In(deleteByIdsDto.ids),
+      status: Status.ACTIVE,
+    });
+
+    if (!users.length) {
+      throw new NotFoundException(
+        `Users with ids ${deleteByIdsDto.ids.join(', ')} not found`,
+      );
+    }
+
+    users.forEach((user) => {
+      user.status = Status.DELETED;
+    });
+
+    await this.userRepository.save(users);
   }
 
   private async hashPassword(password: string, salt: string): Promise<string> {

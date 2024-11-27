@@ -18,6 +18,7 @@ import { GetUser } from '@users/utils';
 import { UserEntity } from '@users/user.entity';
 import {
   CreateServiceDto,
+  CreateServiceResponseDto,
   DeleteByIdsDto,
   GetServicesFilterDto,
   GetServicesResponseDto,
@@ -70,15 +71,13 @@ export class ServicesController {
   })
   @ApiOkResponse({
     description: 'Successfully created',
-    example: {
-      id: 0,
-    },
+    type: CreateServiceResponseDto,
   })
   @Post()
   createService(
     @Body(ValidationPipe) createServiceDto: CreateServiceDto,
     @GetUser() user: UserEntity,
-  ): Promise<Pick<ServiceEntity, 'id'>> {
+  ): Promise<CreateServiceResponseDto> {
     return this.servicesService.createService(createServiceDto, user);
   }
 

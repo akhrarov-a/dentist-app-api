@@ -18,6 +18,7 @@ import { GetUser } from '@users/utils';
 import { UserEntity } from '@users/user.entity';
 import {
   CreatePatientDto,
+  CreatePatientResponseDto,
   DeleteByIdsDto,
   FindPatientsByFirstnameOrLastnameDto,
   GetPatientsFilterDto,
@@ -71,15 +72,13 @@ export class PatientsController {
   })
   @ApiOkResponse({
     description: 'Successfully created',
-    example: {
-      id: 0,
-    },
+    type: CreatePatientResponseDto,
   })
   @Post()
   createPatient(
     @Body(ValidationPipe) createPatientDto: CreatePatientDto,
     @GetUser() user: UserEntity,
-  ): Promise<Pick<PatientEntity, 'id'>> {
+  ): Promise<CreatePatientResponseDto> {
     return this.patientsService.createPatient(createPatientDto, user);
   }
 

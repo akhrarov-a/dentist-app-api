@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from './user-role.enum';
+import { Status, UserRole } from '@core';
 
 export class UserToReturn {
   @ApiProperty({ description: 'ID of the user' })
@@ -25,6 +25,12 @@ export class UserToReturn {
     enum: UserRole,
   })
   role: UserRole;
+
+  @ApiProperty({
+    description: 'Status of the user',
+    enum: Status,
+  })
+  status: string;
 
   @ApiProperty({ description: 'Created date and time of the user' })
   createdAt: Date;

@@ -11,27 +11,22 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import {
-  ApiOkResponse,
-  ApiOperation,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetUser } from '@users/utils';
 import { UserEntity } from '@users/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { DentistGuard } from '@core';
 import {
-  AppointmentResponseWithPatientAndServiceDto,
   CreateAppointmentDto,
+  CreateAppointmentResponseDto,
+  GetAppointmentsByDateDto,
   GetAppointmentsByDateResponseDto,
-  GetAppointmentsByPatientDto,
-  GetAppointmentsByPatientResponseDto,
-  GetAppointmentsByServiceDto,
-  GetAppointmentsByServiceResponseDto,
+  GetAppointmentsDto,
+  GetAppointmentsResponseDto,
   UpdateAppointmentDto,
 } from './dto';
 import { AppointmentsService } from './appointments.service';
+import { AppointmentEntity } from '@appointments/appointment.entity';
 
 @Controller('appointments')
 @ApiTags('Appointments')
@@ -40,51 +35,22 @@ export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @ApiOperation({
-    summary: 'Request for getting appointments by patient id',
+    summary: 'Request for getting appointments by patient id or service id',
     description:
-      'If you want to get appointments by patient id, use this request',
+      'If you want to get appointments by patient id or service id, use this request',
   })
   @ApiOkResponse({
     description: 'Successfully get',
-    type: GetAppointmentsByPatientResponseDto,
+    type: GetAppointmentsResponseDto,
   })
-  @ApiQuery({
-    name: 'patient',
-    required: true,
-  })
-  @Get('/by/patient')
+  @Get()
   getAppointmentsByPatient(
     @Query(ValidationPipe)
-    getAppointmentsByPatientDto: GetAppointmentsByPatientDto,
+    getAppointmentsByPatientDto: GetAppointmentsDto,
     @GetUser() user: UserEntity,
-  ): Promise<GetAppointmentsByPatientResponseDto> {
-    return this.appointmentsService.getAppointmentsByPatient(
+  ): Promise<GetAppointmentsResponseDto> {
+    return this.appointmentsService.getAppointments(
       getAppointmentsByPatientDto,
-      user,
-    );
-  }
-
-  @ApiOperation({
-    summary: 'Request for getting appointments by service id',
-    description:
-      'If you want to get appointments by service id, use this request',
-  })
-  @ApiOkResponse({
-    description: 'Successfully get',
-    type: GetAppointmentsByServiceResponseDto,
-  })
-  @ApiQuery({
-    name: 'service',
-    required: true,
-  })
-  @Get('/by/service')
-  getAppointmentsByService(
-    @Query(ValidationPipe)
-    getAppointmentsByServiceDto: GetAppointmentsByServiceDto,
-    @GetUser() user: UserEntity,
-  ): Promise<GetAppointmentsByServiceResponseDto> {
-    return this.appointmentsService.getAppointmentsByService(
-      getAppointmentsByServiceDto,
       user,
     );
   }
@@ -97,18 +63,15 @@ export class AppointmentsController {
     description: 'Successfully get',
     type: GetAppointmentsByDateResponseDto,
   })
-  @ApiQuery({
-    name: 'date',
-    required: true,
-    description:
-      'Date for which to retrieve appointments in "YYYY-MM-DD" format.',
-  })
   @Get('/by/date')
   getAppointmentsByDate(
-    @Query('date') date: string,
+    @Query(ValidationPipe) getAppointmentsByDateDto: GetAppointmentsByDateDto,
     @GetUser() user: UserEntity,
   ): Promise<GetAppointmentsByDateResponseDto> {
-    return this.appointmentsService.getAppointmentsByDate(date, user);
+    return this.appointmentsService.getAppointmentsByDate(
+      getAppointmentsByDateDto,
+      user,
+    );
   }
 
   @ApiOperation({
@@ -117,13 +80,13 @@ export class AppointmentsController {
   })
   @ApiOkResponse({
     description: 'Successfully get',
-    type: AppointmentResponseWithPatientAndServiceDto,
+    type: AppointmentEntity,
   })
   @Get('/:id')
   getAppointmentById(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: UserEntity,
-  ): Promise<AppointmentResponseWithPatientAndServiceDto> {
+  ): Promise<AppointmentEntity> {
     return this.appointmentsService.getAppointmentById(id, user);
   }
 
@@ -133,13 +96,13 @@ export class AppointmentsController {
   })
   @ApiOkResponse({
     description: 'Successfully created',
-    type: AppointmentResponseWithPatientAndServiceDto,
+    type: CreateAppointmentResponseDto,
   })
   @Post()
   createAppointment(
     @Body(ValidationPipe) createAppointmentDto: CreateAppointmentDto,
     @GetUser() user: UserEntity,
-  ): Promise<AppointmentResponseWithPatientAndServiceDto> {
+  ): Promise<CreateAppointmentResponseDto> {
     return this.appointmentsService.createAppointment(
       createAppointmentDto,
       user,
@@ -150,16 +113,13 @@ export class AppointmentsController {
     summary: 'Request for updating an appointment by id',
     description: 'If you want to update an appointment by id, use this request',
   })
-  @ApiOkResponse({
-    description: 'Successfully updated',
-    type: AppointmentResponseWithPatientAndServiceDto,
-  })
+  @ApiOkResponse({ description: 'Successfully updated' })
   @Patch('/:id')
   updateAppointmentById(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) updateAppointmentDto: UpdateAppointmentDto,
     @GetUser() user: UserEntity,
-  ): Promise<AppointmentResponseWithPatientAndServiceDto> {
+  ): Promise<void> {
     return this.appointmentsService.updateAppointmentById(
       id,
       updateAppointmentDto,

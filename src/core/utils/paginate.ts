@@ -1,7 +1,20 @@
 import { SelectQueryBuilder } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNumberString, IsOptional } from 'class-validator';
 
-export class Pagination {
+export class PaginationDto {
+  @ApiProperty({ description: 'Page number', required: false })
+  @IsOptional()
+  @IsNumberString()
+  page: number;
+
+  @ApiProperty({ description: 'Per page number', required: false })
+  @IsOptional()
+  @IsNumberString()
+  perPage: number;
+}
+
+export class PaginationResponseDto {
   @ApiProperty({ description: 'Total patients number' })
   totalAmount: number;
 
@@ -36,7 +49,7 @@ export const paginate = async <T>({
           ? totalCount / perPage
           : totalCount / perPage + 1,
       ),
-      data: await query.offset(skippedItems).limit(perPage).getMany(),
+      data: await query.skip(skippedItems).take(perPage).getMany(),
     };
   }
 

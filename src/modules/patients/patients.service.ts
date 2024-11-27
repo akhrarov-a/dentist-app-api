@@ -5,6 +5,7 @@ import { UserEntity } from '@users/user.entity';
 import { paginate, Status } from '@core';
 import {
   CreatePatientDto,
+  CreatePatientResponseDto,
   DeleteByIdsDto,
   FindPatientsByFirstnameOrLastnameDto,
   GetPatientsFilterDto,
@@ -26,8 +27,10 @@ export class PatientsService {
   ): Promise<GetPatientsResponseDto> {
     const query = this.patientRepository.createQueryBuilder('patient');
 
-    query.andWhere(`patient.userId = :userId`, { userId: user.id });
-    query.andWhere(`patient.status = :status`, { status: Status.ACTIVE });
+    query
+      .leftJoinAndSelect('patient.user', 'user')
+      .andWhere(`user.id = :userId`, { userId: user.id })
+      .andWhere(`patient.status = :status`, { status: Status.ACTIVE });
 
     Object.entries(filterDto).forEach(([key, value]) => {
       if (!value) return;
@@ -60,8 +63,8 @@ export class PatientsService {
   async getPatientById(id: number, user: UserEntity): Promise<PatientEntity> {
     const patient = await this.patientRepository.findOneBy({
       id,
-      userId: user.id,
       status: Status.ACTIVE,
+      user: { id: user.id },
     });
 
     if (!patient) {
@@ -74,7 +77,7 @@ export class PatientsService {
   async createPatient(
     createPatientDto: CreatePatientDto,
     user: UserEntity,
-  ): Promise<Pick<PatientEntity, 'id'>> {
+  ): Promise<CreatePatientResponseDto> {
     const { firstname, lastname, phone, email, description } = createPatientDto;
 
     const patient = new PatientEntity();
@@ -118,8 +121,8 @@ export class PatientsService {
   ): Promise<void> {
     const patients = await this.patientRepository.findBy({
       id: In(deleteByIdsDto.ids),
-      userId: user.id,
       status: Status.ACTIVE,
+      user: { id: user.id },
     });
 
     if (!patients.length) {
@@ -141,16 +144,16 @@ export class PatientsService {
   ): Promise<PatientEntity[]> {
     const query = this.patientRepository.createQueryBuilder('patient');
 
-    query.andWhere(`patient.userId = :userId`, { userId: user.id });
-    query.andWhere(`patient.status = :status`, { status: Status.ACTIVE });
-
-    query.andWhere(`patient.firstname LIKE :search`, {
-      search: `%${findPatientsByFirstnameOrLastnameDto.search}%`,
-    });
-
-    query.orWhere(`patient.lastname LIKE :search`, {
-      search: `%${findPatientsByFirstnameOrLastnameDto.search}%`,
-    });
+    query
+      .leftJoinAndSelect('patient.user', 'user')
+      .andWhere(`user.id = :userId`, { userId: user.id })
+      .andWhere(`patient.status = :status`, { status: Status.ACTIVE })
+      .andWhere(`patient.firstname LIKE :search`, {
+        search: `%${findPatientsByFirstnameOrLastnameDto.search}%`,
+      })
+      .orWhere(`patient.lastname LIKE :search`, {
+        search: `%${findPatientsByFirstnameOrLastnameDto.search}%`,
+      });
 
     return (await query.getMany()).slice(0, 20);
   }

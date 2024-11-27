@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import { UserEntity } from '@users/user.entity';
-import { AuthCredentialsDto, SignInResponseDto } from './dto';
+import { RefreshDto, SignInDto, SignInResponseDto } from './dto';
 import { JwtPayload } from './types';
 
 @Injectable()
@@ -14,9 +14,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signIn(
-    authCredentialsDto: AuthCredentialsDto,
-  ): Promise<SignInResponseDto> {
+  async signIn(authCredentialsDto: SignInDto): Promise<SignInResponseDto> {
     const email = await this.validateUserPassword(authCredentialsDto);
 
     if (!email) {
@@ -32,9 +30,9 @@ export class AuthService {
     };
   }
 
-  async refreshAccessToken(refreshToken: string): Promise<SignInResponseDto> {
+  async refreshAccessToken(refreshDto: RefreshDto): Promise<SignInResponseDto> {
     try {
-      const decoded = this.jwtService.verify(refreshToken);
+      const decoded = this.jwtService.verify(refreshDto.refreshToken);
 
       const user = await this.userRepository.findOne({
         where: { email: decoded.email },
@@ -46,7 +44,7 @@ export class AuthService {
 
       return {
         accessToken: await this.generateAccessToken(user.email),
-        refreshToken,
+        refreshToken: refreshDto.refreshToken, // TODO: generate new refresh token, delete old one
       };
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
@@ -74,7 +72,7 @@ export class AuthService {
   }
 
   private async validateUserPassword(
-    authCredentialsDto: AuthCredentialsDto,
+    authCredentialsDto: SignInDto,
   ): Promise<string> {
     const { email, password } = authCredentialsDto;
 

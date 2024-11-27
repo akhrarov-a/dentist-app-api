@@ -16,6 +16,8 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '@core';
 import {
   CreateUserDto,
+  CreateUserResponseDto,
+  DeleteByIdsDto,
   GetCurrentUserResponseDto,
   GetUsersFilterDto,
   GetUsersResponseDto,
@@ -99,13 +101,13 @@ export class UsersController {
   })
   @ApiOkResponse({
     description: 'Successfully created',
-    type: UserToReturn,
+    type: CreateUserResponseDto,
   })
   @Post()
   @UseGuards(AdminGuard)
   createUser(
     @Body(ValidationPipe) createUserDto: CreateUserDto,
-  ): Promise<UserToReturn> {
+  ): Promise<CreateUserResponseDto> {
     return this.usersService.createUser(createUserDto);
   }
 
@@ -122,7 +124,7 @@ export class UsersController {
   updateUserById(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) updateUserDto: UpdateUserByIdDto,
-  ): Promise<UserToReturn> {
+  ): Promise<void> {
     return this.usersService.updateUserById(id, updateUserDto);
   }
 
@@ -137,5 +139,20 @@ export class UsersController {
   @UseGuards(AdminGuard)
   deleteUserById(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.usersService.deleteUserById(id);
+  }
+
+  @ApiOperation({
+    summary: 'Request for deleting users by ids',
+    description: 'If you want to delete users by ids, use this request',
+  })
+  @ApiOkResponse({
+    description: 'Successfully deleted',
+  })
+  @Delete('/by/ids')
+  @UseGuards(AdminGuard)
+  deleteUsersByIds(
+    @Body(ValidationPipe) deleteByIdsDto: DeleteByIdsDto,
+  ): Promise<void> {
+    return this.usersService.deleteUsersByIds(deleteByIdsDto);
   }
 }
