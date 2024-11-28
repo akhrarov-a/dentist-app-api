@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { UserEntity } from '@users/user.entity';
 import { paginate, Status } from '@core';
+import { formatPatientToReturn } from './utils';
 import {
   CreatePatientDto,
   CreatePatientResponseDto,
@@ -10,6 +11,7 @@ import {
   FindPatientsByFirstnameOrLastnameDto,
   GetPatientsFilterDto,
   GetPatientsResponseDto,
+  PatientToReturnDto,
   UpdatePatientByIdDto,
 } from './dto';
 import { PatientEntity } from './patient.entity';
@@ -47,7 +49,7 @@ export class PatientsService {
     });
 
     const response: GetPatientsResponseDto = {
-      data,
+      data: data.map(formatPatientToReturn),
       totalAmount,
       totalPages,
     };
@@ -58,6 +60,13 @@ export class PatientsService {
     }
 
     return response;
+  }
+
+  async getFormattedPatientById(
+    id: number,
+    user: UserEntity,
+  ): Promise<PatientToReturnDto> {
+    return formatPatientToReturn(await this.getPatientById(id, user));
   }
 
   async getPatientById(id: number, user: UserEntity): Promise<PatientEntity> {
@@ -141,7 +150,7 @@ export class PatientsService {
   async findPatientsByFirstNameOrLastName(
     findPatientsByFirstnameOrLastnameDto: FindPatientsByFirstnameOrLastnameDto,
     user: UserEntity,
-  ): Promise<PatientEntity[]> {
+  ): Promise<PatientToReturnDto[]> {
     const query = this.patientRepository.createQueryBuilder('patient');
 
     query
@@ -155,6 +164,6 @@ export class PatientsService {
         search: `%${findPatientsByFirstnameOrLastnameDto.search}%`,
       });
 
-    return (await query.getMany()).slice(0, 20);
+    return (await query.getMany()).slice(0, 20).map(formatPatientToReturn);
   }
 }

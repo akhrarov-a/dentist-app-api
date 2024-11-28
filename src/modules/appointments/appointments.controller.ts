@@ -17,6 +17,7 @@ import { UserEntity } from '@users/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { DentistGuard } from '@core';
 import {
+  AppointmentToReturnDto,
   CreateAppointmentDto,
   CreateAppointmentResponseDto,
   GetAppointmentsByDateDto,
@@ -26,7 +27,6 @@ import {
   UpdateAppointmentDto,
 } from './dto';
 import { AppointmentsService } from './appointments.service';
-import { AppointmentEntity } from '@appointments/appointment.entity';
 
 @Controller('appointments')
 @ApiTags('Appointments')
@@ -80,14 +80,14 @@ export class AppointmentsController {
   })
   @ApiOkResponse({
     description: 'Successfully get',
-    type: AppointmentEntity,
+    type: AppointmentToReturnDto,
   })
   @Get('/:id')
   getAppointmentById(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: UserEntity,
-  ): Promise<AppointmentEntity> {
-    return this.appointmentsService.getAppointmentById(id, user);
+  ): Promise<AppointmentToReturnDto> {
+    return this.appointmentsService.getFormattedAppointmentById(id, user);
   }
 
   @ApiOperation({

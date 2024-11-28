@@ -10,18 +10,20 @@ import { paginate } from '@core';
 import { UserEntity } from '@users/user.entity';
 import { PatientsService } from '@patients/patients.service';
 import { ServicesService } from '@services/services.service';
+import { formatAppointmentToReturn } from './utils';
 import {
+  AppointmentToReturnDto,
   CreateAppointmentDto,
   CreateAppointmentResponseDto,
   GetAppointmentsByDateDto,
   GetAppointmentsByDateResponseDto,
   GetAppointmentsDto,
   GetAppointmentsResponseDto,
+  ServiceDto,
   UpdateAppointmentDto,
 } from './dto';
 import { AppointmentEntity } from './appointment.entity';
 import { AppointmentServiceEntity } from './appointment-service.entity';
-import { ServiceDto } from '@appointments/dto/service-dto';
 
 @Injectable()
 export class AppointmentsService {
@@ -71,7 +73,7 @@ export class AppointmentsService {
     );
 
     const response: GetAppointmentsResponseDto = {
-      data,
+      data: data.map(formatAppointmentToReturn),
       totalAmount,
       totalPages,
     };
@@ -111,8 +113,15 @@ export class AppointmentsService {
 
     return {
       date,
-      appointments,
+      appointments: appointments.map(formatAppointmentToReturn),
     };
+  }
+
+  async getFormattedAppointmentById(
+    id: number,
+    user: UserEntity,
+  ): Promise<AppointmentToReturnDto> {
+    return formatAppointmentToReturn(await this.getAppointmentById(id, user));
   }
 
   async getAppointmentById(

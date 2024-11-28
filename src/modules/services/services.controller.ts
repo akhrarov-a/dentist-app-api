@@ -22,10 +22,10 @@ import {
   DeleteByIdsDto,
   GetServicesFilterDto,
   GetServicesResponseDto,
+  ServiceToReturnDto,
   UpdateServiceByIdDto,
 } from './dto';
 import { ServicesService } from './services.service';
-import { ServiceEntity } from './service.entity';
 
 @Controller('services')
 @ApiTags('Services')
@@ -55,14 +55,14 @@ export class ServicesController {
   })
   @ApiOkResponse({
     description: 'Successfully get',
-    type: ServiceEntity,
+    type: ServiceToReturnDto,
   })
   @Get('/:id')
   getServiceById(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: UserEntity,
-  ): Promise<ServiceEntity> {
-    return this.servicesService.getServiceById(id, user);
+  ): Promise<ServiceToReturnDto> {
+    return this.servicesService.getFormattedServiceById(id, user);
   }
 
   @ApiOperation({

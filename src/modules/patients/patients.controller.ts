@@ -23,10 +23,10 @@ import {
   FindPatientsByFirstnameOrLastnameDto,
   GetPatientsFilterDto,
   GetPatientsResponseDto,
+  PatientToReturnDto,
   UpdatePatientByIdDto,
 } from './dto';
 import { PatientsService } from './patients.service';
-import { PatientEntity } from './patient.entity';
 
 @Controller('patients')
 @ApiTags('Patients')
@@ -56,14 +56,14 @@ export class PatientsController {
   })
   @ApiOkResponse({
     description: 'Successfully get',
-    type: PatientEntity,
+    type: PatientToReturnDto,
   })
   @Get('/:id')
   getPatientById(
     @Param('id', ParseIntPipe) id: number,
     @GetUser() user: UserEntity,
-  ): Promise<PatientEntity> {
-    return this.patientsService.getPatientById(id, user);
+  ): Promise<PatientToReturnDto> {
+    return this.patientsService.getFormattedPatientById(id, user);
   }
 
   @ApiOperation({
@@ -139,14 +139,14 @@ export class PatientsController {
   })
   @ApiOkResponse({
     description: 'Successfully get',
-    type: [PatientEntity],
+    type: [PatientToReturnDto],
   })
   @Get('/by/firstname-or-lastname')
   findPatientsByFirstnameOrLastname(
     @Query(ValidationPipe)
     findPatientsByFirstnameOrLastnameDto: FindPatientsByFirstnameOrLastnameDto,
     @GetUser() user: UserEntity,
-  ): Promise<PatientEntity[]> {
+  ): Promise<PatientToReturnDto[]> {
     return this.patientsService.findPatientsByFirstNameOrLastName(
       findPatientsByFirstnameOrLastnameDto,
       user,

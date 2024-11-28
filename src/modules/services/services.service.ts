@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { UserEntity } from '@users/user.entity';
 import { paginate, Status } from '@core';
+import { formatServiceToReturn } from './utils';
 import {
   CreateServiceDto,
   CreateServiceResponseDto,
   DeleteByIdsDto,
   GetServicesFilterDto,
   GetServicesResponseDto,
+  ServiceToReturnDto,
   UpdateServiceByIdDto,
 } from './dto';
 import { ServiceEntity } from './service.entity';
@@ -46,7 +48,7 @@ export class ServicesService {
     });
 
     const response: GetServicesResponseDto = {
-      data,
+      data: data.map(formatServiceToReturn),
       totalAmount,
       totalPages,
     };
@@ -76,6 +78,13 @@ export class ServicesService {
     }
 
     return services;
+  }
+
+  async getFormattedServiceById(
+    id: number,
+    user: UserEntity,
+  ): Promise<ServiceToReturnDto> {
+    return formatServiceToReturn(await this.getServiceById(id, user));
   }
 
   async getServiceById(id: number, user: UserEntity): Promise<ServiceEntity> {

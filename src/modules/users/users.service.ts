@@ -7,8 +7,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { formatUserToReturn } from './utils';
 import { paginate, Status } from '@core';
+import { formatUserToReturn } from './utils';
 import {
   CreateUserDto,
   CreateUserResponseDto,
@@ -129,8 +129,8 @@ export class UsersService {
     user.description = description;
     user.phone = phone;
     user.email = email;
-    user.password = await this.hashPassword(password, user.salt);
     user.salt = await bcrypt.genSalt();
+    user.password = await this.hashPassword(password, user.salt);
     user.role = role;
     user.status = Status.ACTIVE;
 

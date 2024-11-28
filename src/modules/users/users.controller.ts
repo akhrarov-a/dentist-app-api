@@ -115,10 +115,7 @@ export class UsersController {
     summary: 'Request for updating user by id',
     description: 'If you want to update user by id, use this request',
   })
-  @ApiOkResponse({
-    description: 'Successfully updated',
-    type: UserToReturn,
-  })
+  @ApiOkResponse({ description: 'Successfully updated' })
   @Patch('/:id')
   @UseGuards(AdminGuard)
   updateUserById(

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AppointmentEntity } from '../../appointment.entity';
+import { AppointmentToReturnDto } from '../appointment-to-return';
 
 export class GetAppointmentsByDateResponseDto {
   @ApiProperty({ description: 'Date' })
@@ -7,7 +7,7 @@ export class GetAppointmentsByDateResponseDto {
 
   @ApiProperty({
     description: 'Appointments',
-    type: [AppointmentEntity],
+    type: [AppointmentToReturnDto],
   })
-  appointments: AppointmentEntity[];
+  appointments: AppointmentToReturnDto[];
 }
