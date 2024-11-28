@@ -11,14 +11,24 @@ export const formatAppointmentToReturn = ({
   patient,
   appointmentServices,
   ...rest
-}: AppointmentEntity): AppointmentToReturnDto => ({
-  ...rest,
-  appointmentServices: appointmentServices.map(
-    formatAppointmentServiceToReturn,
-  ),
-  patient: formatPatientToReturn(patient),
-  createdAt: created_at,
-  updatedAt: updated_at,
-  startTime: start_time,
-  endTime: end_time,
-});
+}: AppointmentEntity): AppointmentToReturnDto => {
+  const appointmentToReturnDto: AppointmentToReturnDto = {
+    ...rest,
+    createdAt: created_at,
+    updatedAt: updated_at,
+    startTime: start_time,
+    endTime: end_time,
+  } as unknown as AppointmentToReturnDto;
+
+  if (appointmentServices?.length) {
+    appointmentToReturnDto.appointmentServices = appointmentServices.map(
+      formatAppointmentServiceToReturn,
+    );
+  }
+
+  if (patient) {
+    appointmentToReturnDto.patient = formatPatientToReturn(patient);
+  }
+
+  return appointmentToReturnDto;
+};

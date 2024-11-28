@@ -30,8 +30,7 @@ export class PatientsService {
     const query = this.patientRepository.createQueryBuilder('patient');
 
     query
-      .leftJoinAndSelect('patient.user', 'user')
-      .andWhere(`user.id = :userId`, { userId: user.id })
+      .andWhere(`patient.user_id = :user_id`, { user_id: user.id })
       .andWhere(`patient.status = :status`, { status: Status.ACTIVE });
 
     Object.entries(filterDto).forEach(([key, value]) => {
@@ -154,8 +153,7 @@ export class PatientsService {
     const query = this.patientRepository.createQueryBuilder('patient');
 
     query
-      .leftJoinAndSelect('patient.user', 'user')
-      .andWhere(`user.id = :userId`, { userId: user.id })
+      .andWhere(`patient.user_id = :user_id`, { user_id: user.id })
       .andWhere(`patient.status = :status`, { status: Status.ACTIVE })
       .andWhere(`patient.firstname LIKE :search`, {
         search: `%${findPatientsByFirstnameOrLastnameDto.search}%`,

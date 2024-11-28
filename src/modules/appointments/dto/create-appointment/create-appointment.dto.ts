@@ -4,6 +4,7 @@ import {
   IsDateString,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -36,8 +37,12 @@ export class CreateAppointmentDto {
   @IsDateString()
   endTime: Date;
 
-  @ApiProperty({ description: 'Description of an appointment' })
+  @ApiProperty({
+    description: 'Description of an appointment',
+    required: false,
+  })
   @IsNotEmpty()
   @IsString()
+  @IsOptional()
   description: string;
 }

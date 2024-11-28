@@ -8,9 +8,21 @@ export const formatAppointmentServiceToReturn = ({
   appointment,
   service,
   description,
-}: AppointmentServiceEntity): AppointmentServiceToReturnDto => ({
-  id,
-  appointment: formatAppointmentToReturn(appointment),
-  service: formatServiceToReturn(service),
-  description,
-});
+}: AppointmentServiceEntity): AppointmentServiceToReturnDto => {
+  const appointServiceToReturnDto: AppointmentServiceToReturnDto = {
+    id,
+    service: formatServiceToReturn(service),
+    description,
+  } as AppointmentServiceToReturnDto;
+
+  if (appointment) {
+    appointServiceToReturnDto.appointment =
+      formatAppointmentToReturn(appointment);
+  }
+
+  if (service) {
+    appointServiceToReturnDto.service = formatServiceToReturn(service);
+  }
+
+  return appointServiceToReturnDto;
+};

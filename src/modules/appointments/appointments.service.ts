@@ -42,10 +42,15 @@ export class AppointmentsService {
   ): Promise<GetAppointmentsResponseDto> {
     const query = this.appointmentRepository.createQueryBuilder('appointment');
 
-    query.andWhere(`appointment.user_id = :user_id`, { user_id: user.id });
+    query
+      .andWhere(`appointment.user_id = :user_id`, { user_id: user.id })
+      .leftJoinAndSelect(
+        'appointment.appointmentServices',
+        'appointmentServices',
+      );
 
     if (service) {
-      query.andWhere('appointment.service_id = :service_id', {
+      query.andWhere('appointmentServices.service_id = :service_id', {
         service_id: service,
       });
     }
@@ -58,10 +63,6 @@ export class AppointmentsService {
 
     query
       .leftJoinAndSelect('appointment.patient', 'patient')
-      .leftJoinAndSelect(
-        'appointment.appointmentServices',
-        'appointmentServices',
-      )
       .leftJoinAndSelect('appointmentServices.service', 'service');
 
     const { totalAmount, totalPages, data } = await paginate<AppointmentEntity>(
@@ -100,8 +101,10 @@ export class AppointmentsService {
 
     query
       .andWhere(`appointment.user_id = :user_id`, { user_id: user.id })
-      .andWhere('appointment.startTime >= :startOfDay', { startOfDay })
-      .andWhere('appointment.endTime <= :endOfDay', { endOfDay })
+      .andWhere('appointment.start_time >= :start_time', {
+        start_time: startOfDay,
+      })
+      .andWhere('appointment.end_time <= :end_time', { end_time: endOfDay })
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect(
         'appointment.appointmentServices',
@@ -144,6 +147,8 @@ export class AppointmentsService {
       throw new NotFoundException(`Appointment with id ${id} not found`);
     }
 
+    console.log(appointment);
+
     return appointment;
   }
 
@@ -165,6 +170,8 @@ export class AppointmentsService {
     appointment.description = description;
     appointment.user = user;
     appointment.patient = patient;
+
+    await appointment.save();
 
     await this.createAndSaveAppointmentServiceRelations(
       services,
@@ -261,6 +268,7 @@ export class AppointmentsService {
 
       const appointmentService = new AppointmentServiceEntity();
 
+      appointmentService.user = user;
       appointmentService.appointment = appointment;
       appointmentService.service = service;
       appointmentService.description = serviceItem.description;
@@ -282,8 +290,10 @@ export class AppointmentsService {
 
     query
       .where('appointment.user_id = :user_id', { user_id: user.id })
-      .andWhere('appointment.startTime < :endTime', { endTime })
-      .andWhere('appointment.endTime > :startTime', { startTime });
+      .andWhere('appointment.start_time < :end_time', { end_time: endTime })
+      .andWhere('appointment.end_time > :start_time', {
+        start_time: startTime,
+      });
 
     if (!!(await query.getOne())) {
       throw new ConflictException(

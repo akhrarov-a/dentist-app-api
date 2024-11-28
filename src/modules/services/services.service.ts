@@ -29,8 +29,7 @@ export class ServicesService {
     const query = this.serviceRepository.createQueryBuilder('service');
 
     query
-      .leftJoinAndSelect('service.user', 'user')
-      .andWhere(`user.id = :userId`, { userId: user.id })
+      .andWhere(`service.user_id = :user_id`, { user_id: user.id })
       .andWhere(`service.status = :status`, { status: Status.ACTIVE });
 
     Object.entries(filterDto).forEach(([key, value]) => {

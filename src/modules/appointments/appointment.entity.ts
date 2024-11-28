@@ -24,7 +24,7 @@ export class AppointmentEntity extends BaseEntity {
   @Column()
   end_time: Date;
 
-  @Column()
+  @Column({ type: 'text', nullable: true })
   description: string;
 
   @CreateDateColumn()
