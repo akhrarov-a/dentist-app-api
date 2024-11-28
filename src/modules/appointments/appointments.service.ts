@@ -88,23 +88,41 @@ export class AppointmentsService {
   }
 
   async getAppointmentsByDate(
-    { date }: GetAppointmentsByDateDto,
+    { date, type }: GetAppointmentsByDateDto,
     user: UserEntity,
   ): Promise<GetAppointmentsByDateResponseDto> {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
+    const targetDate = new Date(date);
 
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    let startOfPeriod: Date;
+    let endOfPeriod: Date;
+
+    if (type === 'day') {
+      startOfPeriod = new Date(targetDate);
+      startOfPeriod.setHours(0, 0, 0, 0);
+
+      endOfPeriod = new Date(targetDate);
+      endOfPeriod.setHours(23, 59, 59, 999);
+    } else if (type === 'week') {
+      const dayOfWeek = targetDate.getDay();
+      const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+      startOfPeriod = new Date(targetDate);
+      startOfPeriod.setDate(targetDate.getDate() + diffToMonday);
+      startOfPeriod.setHours(0, 0, 0, 0);
+
+      endOfPeriod = new Date(startOfPeriod);
+      endOfPeriod.setDate(startOfPeriod.getDate() + 6);
+      endOfPeriod.setHours(23, 59, 59, 999);
+    }
 
     const query = this.appointmentRepository.createQueryBuilder('appointment');
 
     query
       .andWhere(`appointment.user_id = :user_id`, { user_id: user.id })
       .andWhere('appointment.start_time >= :start_time', {
-        start_time: startOfDay,
+        start_time: startOfPeriod,
       })
-      .andWhere('appointment.end_time <= :end_time', { end_time: endOfDay })
+      .andWhere('appointment.end_time <= :end_time', { end_time: endOfPeriod })
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect(
         'appointment.appointmentServices',
@@ -114,9 +132,48 @@ export class AppointmentsService {
 
     const appointments = await query.getMany();
 
+    const groupedAppointments: GetAppointmentsByDateResponseDto['appointments'] =
+      [];
+
+    if (type === 'week') {
+      for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(startOfPeriod);
+        currentDate.setDate(startOfPeriod.getDate() + i);
+
+        const [day, month, year] = currentDate
+          .toLocaleDateString('en-GB')
+          .split('/');
+
+        const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+
+        groupedAppointments.push({
+          date: formattedDate,
+          appointments: appointments
+            .filter(
+              (appointment) =>
+                new Date(appointment.start_time).getDate() ===
+                currentDate.getDate(),
+            )
+            .map(formatAppointmentToReturn),
+        });
+      }
+    } else {
+      const [day, month, year] = targetDate
+        .toLocaleDateString('en-GB')
+        .split('/');
+
+      const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+
+      groupedAppointments.push({
+        date: formattedDate,
+        appointments: appointments.map(formatAppointmentToReturn),
+      });
+    }
+
     return {
       date,
-      appointments: appointments.map(formatAppointmentToReturn),
+      type,
+      appointments: groupedAppointments,
     };
   }
 
@@ -146,8 +203,6 @@ export class AppointmentsService {
     if (!appointment) {
       throw new NotFoundException(`Appointment with id ${id} not found`);
     }
-
-    console.log(appointment);
 
     return appointment;
   }

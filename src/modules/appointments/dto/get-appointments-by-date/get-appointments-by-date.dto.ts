@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString } from 'class-validator';
+import { IsDateString, IsIn } from 'class-validator';
+import { DateType } from '../../types';
 
 export class GetAppointmentsByDateDto {
   @ApiProperty({
@@ -8,4 +9,8 @@ export class GetAppointmentsByDateDto {
   })
   @IsDateString()
   date: string;
+
+  @ApiProperty({ description: 'Date type', enum: DateType })
+  @IsIn([DateType.DAY, DateType.WEEK])
+  type: DateType;
 }
