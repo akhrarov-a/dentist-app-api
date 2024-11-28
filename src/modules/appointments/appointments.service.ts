@@ -63,7 +63,8 @@ export class AppointmentsService {
 
     query
       .leftJoinAndSelect('appointment.patient', 'patient')
-      .leftJoinAndSelect('appointmentServices.service', 'service');
+      .leftJoinAndSelect('appointmentServices.service', 'service')
+      .orderBy('appointment.start_time', 'DESC');
 
     const { totalAmount, totalPages, data } = await paginate<AppointmentEntity>(
       {
