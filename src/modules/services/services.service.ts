@@ -40,6 +40,13 @@ export class ServicesService {
       });
     });
 
+    query.select([
+      'service.id',
+      'service.name',
+      'service.created_at',
+      'service.updated_at',
+    ]);
+
     const { totalAmount, totalPages, data } = await paginate<ServiceEntity>({
       query,
       page,
@@ -87,10 +94,13 @@ export class ServicesService {
   }
 
   async getServiceById(id: number, user: UserEntity): Promise<ServiceEntity> {
-    const service = await this.serviceRepository.findOneBy({
-      id,
-      user: { id: user.id },
-      status: Status.ACTIVE,
+    const service = await this.serviceRepository.findOne({
+      where: {
+        id,
+        user: { id: user.id },
+        status: Status.ACTIVE,
+      },
+      select: ['id', 'name'],
     });
 
     if (!service) {
