@@ -46,6 +46,8 @@ export class UsersService {
       lastname: user.lastname,
       phone: user.phone,
       role: user.role,
+      layoutTitle: user.layoutTitle,
+      language: user.language,
     };
   }
 
@@ -119,8 +121,17 @@ export class UsersService {
   async createUser(
     createUserDto: CreateUserDto,
   ): Promise<CreateUserResponseDto> {
-    const { firstname, lastname, phone, password, role, email, description } =
-      createUserDto;
+    const {
+      firstname,
+      lastname,
+      phone,
+      password,
+      role,
+      email,
+      description,
+      layoutTitle,
+      language,
+    } = createUserDto;
 
     const user = new UserEntity();
 
@@ -131,6 +142,8 @@ export class UsersService {
     user.email = email;
     user.salt = await bcrypt.genSalt();
     user.password = await this.hashPassword(password, user.salt);
+    user.layoutTitle = layoutTitle;
+    user.language = language;
     user.role = role;
     user.status = Status.ACTIVE;
 

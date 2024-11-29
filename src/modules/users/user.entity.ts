@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Status, UserRole } from '@core';
+import { Language, Status, UserRole } from '@core';
 import { PatientEntity } from '@patients/patient.entity';
 import { AppointmentEntity } from '@appointments/appointment.entity';
 import { ServiceEntity } from '@services/service.entity';
@@ -39,11 +39,17 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
   password: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  layoutTitle: string;
+
   @Column({ type: 'varchar', length: 255 })
   salt: string;
 
   @Column({ type: 'enum', enum: UserRole })
   role: UserRole;
+
+  @Column({ type: 'enum', enum: Language, default: Language.RU })
+  language: Language;
 
   @Column({ type: 'enum', enum: Status, default: Status.ACTIVE })
   status: Status;

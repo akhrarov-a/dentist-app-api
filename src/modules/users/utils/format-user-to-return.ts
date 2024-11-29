@@ -12,6 +12,8 @@ export const formatUserToReturn = ({
   status,
   created_at,
   updated_at,
+  layoutTitle,
+  language,
 }: UserEntity): UserToReturn => ({
   id,
   email,
@@ -21,6 +23,8 @@ export const formatUserToReturn = ({
   phone,
   role,
   status,
+  layoutTitle,
+  language,
   createdAt: created_at,
   updatedAt: updated_at,
 });

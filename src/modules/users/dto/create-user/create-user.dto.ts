@@ -10,7 +10,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { passwordRegex, UserRole } from '@core';
+import { Language, passwordRegex, UserRole } from '@core';
 
 export class CreateUserDto {
   @ApiProperty({ description: 'Firstname of the user' })
@@ -48,6 +48,21 @@ export class CreateUserDto {
   @MaxLength(20)
   @Matches(passwordRegex, { message: 'Password is too weak' })
   password: string;
+
+  @ApiProperty({ description: 'Layout title of the user', required: false })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  layoutTitle: string;
+
+  @ApiProperty({
+    description: 'Language of the user',
+    enum: Language,
+    required: false,
+  })
+  @IsOptional()
+  @IsIn([Language.RU, Language.EN])
+  language: Language;
 
   @ApiProperty({ description: 'Role of the user', enum: UserRole })
   @IsIn([UserRole.ADMIN, UserRole.DENTIST])

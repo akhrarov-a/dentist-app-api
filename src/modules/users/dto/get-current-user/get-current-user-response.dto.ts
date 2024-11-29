@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '@core';
+import { Language, UserRole } from '@core';
 
 export class GetCurrentUserResponseDto {
   @ApiProperty({ description: 'ID of the user' })
@@ -22,4 +22,10 @@ export class GetCurrentUserResponseDto {
     enum: UserRole,
   })
   role: UserRole;
+
+  @ApiProperty({ description: 'Layout title of the user' })
+  layoutTitle: string;
+
+  @ApiProperty({ description: 'Language of the user', enum: Language })
+  language: Language;
 }

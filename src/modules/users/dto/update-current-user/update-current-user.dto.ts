@@ -1,10 +1,12 @@
 import {
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
   IsString,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Language } from '@core';
 
 export class UpdateCurrentUserDto {
   @ApiProperty({
@@ -28,4 +30,19 @@ export class UpdateCurrentUserDto {
   @IsNotEmpty()
   @IsPhoneNumber('UZ')
   phone: string;
+
+  @ApiProperty({
+    description: 'Language of the user',
+    enum: Language,
+    required: false,
+  })
+  @IsOptional()
+  @IsIn([Language.RU, Language.EN])
+  language: Language;
+
+  @ApiProperty({ description: 'Layout title of the user', required: false })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  layoutTitle: string;
 }
