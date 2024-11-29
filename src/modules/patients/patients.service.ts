@@ -41,6 +41,17 @@ export class PatientsService {
       });
     });
 
+    query.select([
+      'patient.id',
+      'patient.firstname',
+      'patient.lastname',
+      'patient.phone',
+      'patient.description',
+      'patient.email',
+      'patient.created_at',
+      'patient.updated_at',
+    ]);
+
     const { totalAmount, totalPages, data } = await paginate<PatientEntity>({
       query,
       page,
@@ -69,10 +80,13 @@ export class PatientsService {
   }
 
   async getPatientById(id: number, user: UserEntity): Promise<PatientEntity> {
-    const patient = await this.patientRepository.findOneBy({
-      id,
-      status: Status.ACTIVE,
-      user: { id: user.id },
+    const patient = await this.patientRepository.findOne({
+      where: {
+        id,
+        status: Status.ACTIVE,
+        user: { id: user.id },
+      },
+      select: ['id', 'firstname', 'lastname', 'phone', 'description', 'email'],
     });
 
     if (!patient) {
@@ -160,7 +174,8 @@ export class PatientsService {
       })
       .orWhere(`patient.lastname LIKE :search`, {
         search: `%${findPatientsByFirstnameOrLastnameDto.search}%`,
-      });
+      })
+      .select(['patient.id', 'patient.firstname', 'patient.lastname']);
 
     return (await query.getMany()).slice(0, 20).map(formatPatientToReturn);
   }
