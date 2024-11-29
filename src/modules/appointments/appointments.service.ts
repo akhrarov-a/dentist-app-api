@@ -66,6 +66,32 @@ export class AppointmentsService {
       .leftJoinAndSelect('appointmentServices.service', 'service')
       .orderBy('appointment.start_time', 'DESC');
 
+    if (service) {
+      query.select([
+        'appointment.id',
+        'appointment.start_time',
+        'appointment.end_time',
+        'appointmentServices.id',
+        'appointmentServices.description',
+        'service.id',
+        'patient.id',
+        'patient.firstname',
+        'patient.lastname',
+      ]);
+    }
+
+    if (patient) {
+      query.select([
+        'appointment.id',
+        'appointment.start_time',
+        'appointment.end_time',
+        'appointmentServices.id',
+        'appointmentServices.description',
+        'service.id',
+        'service.name',
+      ]);
+    }
+
     const { totalAmount, totalPages, data } = await paginate<AppointmentEntity>(
       {
         query,
@@ -129,7 +155,20 @@ export class AppointmentsService {
         'appointment.appointmentServices',
         'appointmentServices',
       )
-      .leftJoinAndSelect('appointmentServices.service', 'service');
+      .leftJoinAndSelect('appointmentServices.service', 'service')
+      .select([
+        'appointment.id',
+        'appointment.start_time',
+        'appointment.end_time',
+        'appointment.description',
+        'patient.id',
+        'patient.firstname',
+        'patient.lastname',
+        'appointmentServices.id',
+        'appointmentServices.description',
+        'service.id',
+        'service.name',
+      ]);
 
     const appointments = await query.getMany();
 
@@ -189,17 +228,31 @@ export class AppointmentsService {
     id: number,
     user: UserEntity,
   ): Promise<AppointmentEntity> {
-    const appointment = await this.appointmentRepository.findOne({
-      where: {
-        id,
-        user: { id: user.id },
-      },
-      relations: [
-        'patient',
+    const query = this.appointmentRepository.createQueryBuilder('appointment');
+
+    query
+      .andWhere('appointment.id = :id', { id })
+      .andWhere(`appointment.user_id = :user_id`, { user_id: user.id })
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .leftJoinAndSelect(
+        'appointment.appointmentServices',
         'appointmentServices',
-        'appointmentServices.service',
-      ],
-    });
+      )
+      .leftJoinAndSelect('appointmentServices.service', 'service')
+      .select([
+        'appointment.id',
+        'appointment.start_time',
+        'appointment.end_time',
+        'appointment.description',
+        'patient.id',
+        'patient.firstname',
+        'patient.lastname',
+        'appointmentServices.id',
+        'appointmentServices.description',
+        'service.id',
+      ]);
+
+    const appointment = await query.getOne();
 
     if (!appointment) {
       throw new NotFoundException(`Appointment with id ${id} not found`);
