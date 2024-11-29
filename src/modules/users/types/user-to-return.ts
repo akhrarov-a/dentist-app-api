@@ -38,6 +38,12 @@ export class UserToReturn {
   @ApiProperty({ description: 'Layout title of the user' })
   layoutTitle: string;
 
+  @ApiProperty({ description: 'Holidays of the user' })
+  holidays: string[];
+
+  @ApiProperty({ description: 'Weekends of the user' })
+  weekends: number[];
+
   @ApiProperty({ description: 'Created date and time of the user' })
   createdAt: Date;
 

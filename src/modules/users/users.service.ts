@@ -48,6 +48,8 @@ export class UsersService {
       role: user.role,
       layoutTitle: user.layoutTitle,
       language: user.language,
+      holidays: user.holidays,
+      weekends: user.weekends,
     };
   }
 
@@ -131,6 +133,8 @@ export class UsersService {
       description,
       layoutTitle,
       language,
+      holidays,
+      weekends,
     } = createUserDto;
 
     const user = new UserEntity();
@@ -143,6 +147,8 @@ export class UsersService {
     user.salt = await bcrypt.genSalt();
     user.password = await this.hashPassword(password, user.salt);
     user.layoutTitle = layoutTitle;
+    user.weekends = weekends;
+    user.holidays = holidays;
     user.language = language;
     user.role = role;
     user.status = Status.ACTIVE;

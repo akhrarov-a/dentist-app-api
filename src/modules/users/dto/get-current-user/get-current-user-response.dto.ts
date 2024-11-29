@@ -28,4 +28,10 @@ export class GetCurrentUserResponseDto {
 
   @ApiProperty({ description: 'Language of the user', enum: Language })
   language: Language;
+
+  @ApiProperty({ description: 'Holidays of the user', required: false })
+  holidays: string[];
+
+  @ApiProperty({ description: 'Weekends of the user', required: false })
+  weekends: number[];
 }

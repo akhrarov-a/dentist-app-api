@@ -1,6 +1,8 @@
 import {
+  IsArray,
   IsIn,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsPhoneNumber,
   IsString,
@@ -39,6 +41,18 @@ export class UpdateCurrentUserDto {
   @IsOptional()
   @IsIn([Language.RU, Language.EN])
   language: Language;
+
+  @ApiProperty({ description: 'Holidays of the user', required: false })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  holidays: string[];
+
+  @ApiProperty({ description: 'Weekends of the user', required: false })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  weekends: number[];
 
   @ApiProperty({ description: 'Layout title of the user', required: false })
   @IsOptional()

@@ -1,7 +1,9 @@
 import {
+  IsArray,
   IsEmail,
   IsIn,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsPhoneNumber,
   IsString,
@@ -54,6 +56,18 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   layoutTitle: string;
+
+  @ApiProperty({ description: 'Holidays of the user', required: false })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  holidays: string[];
+
+  @ApiProperty({ description: 'Weekends of the user', required: false })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  weekends: number[];
 
   @ApiProperty({
     description: 'Language of the user',
