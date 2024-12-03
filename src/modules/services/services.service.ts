@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { UserEntity } from '@users/user.entity';
@@ -114,6 +118,18 @@ export class ServicesService {
     createServiceDto: CreateServiceDto,
     user: UserEntity,
   ): Promise<CreateServiceResponseDto> {
+    const isServiceExistsWithThisName = await this.serviceRepository.findOneBy({
+      name: createServiceDto.name,
+      status: Status.ACTIVE,
+    });
+
+    if (isServiceExistsWithThisName) {
+      throw new ConflictException({
+        errorCode: '23505',
+        message: 'Service with this name already exists',
+      });
+    }
+
     const { name } = createServiceDto;
 
     const service = new ServiceEntity();
@@ -132,6 +148,18 @@ export class ServicesService {
     updateServiceByIdDto: UpdateServiceByIdDto,
     user: UserEntity,
   ): Promise<void> {
+    const anotherServiceWithThisName = await this.serviceRepository.findOneBy({
+      name: updateServiceByIdDto.name,
+      status: Status.ACTIVE,
+    });
+
+    if (anotherServiceWithThisName && anotherServiceWithThisName.id !== id) {
+      throw new ConflictException({
+        errorCode: '23505',
+        message: 'Service with this name already exists',
+      });
+    }
+
     const service = await this.getServiceById(id, user);
 
     Object.keys(updateServiceByIdDto).map((key) => {

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { UserEntity } from '@users/user.entity';
@@ -100,6 +104,20 @@ export class PatientsService {
     createPatientDto: CreatePatientDto,
     user: UserEntity,
   ): Promise<CreatePatientResponseDto> {
+    const isPatientExistsWithThisPhone = await this.patientRepository.findOneBy(
+      {
+        phone: createPatientDto.phone,
+        status: Status.ACTIVE,
+      },
+    );
+
+    if (isPatientExistsWithThisPhone) {
+      throw new ConflictException({
+        errorCode: '23505',
+        message: 'Patient with this phone already exists',
+      });
+    }
+
     const { firstname, lastname, phone, email, description } = createPatientDto;
 
     const patient = new PatientEntity();
@@ -122,6 +140,18 @@ export class PatientsService {
     updatePatientByIdDto: UpdatePatientByIdDto,
     user: UserEntity,
   ): Promise<void> {
+    const anotherPatientWithThisPhone = await this.patientRepository.findOneBy({
+      phone: updatePatientByIdDto.phone,
+      status: Status.ACTIVE,
+    });
+
+    if (anotherPatientWithThisPhone && anotherPatientWithThisPhone.id !== id) {
+      throw new ConflictException({
+        errorCode: '23505',
+        message: 'Patient with this phone already exists',
+      });
+    }
+
     const patient = await this.getPatientById(id, user);
 
     Object.keys(updatePatientByIdDto).map((key) => {

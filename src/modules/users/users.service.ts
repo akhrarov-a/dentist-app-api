@@ -157,7 +157,10 @@ export class UsersService {
       await user.save();
     } catch (error) {
       if (error.code === '23505') {
-        throw new ConflictException('User with this email already exists');
+        throw new ConflictException({
+          errorCode: '23505',
+          message: 'User with this email already exists',
+        });
       } else {
         throw new InternalServerErrorException();
       }
@@ -172,6 +175,18 @@ export class UsersService {
     id: number,
     updateUserDto: UpdateUserByIdDto,
   ): Promise<void> {
+    const anotherUserWithThisEmail = await this.userRepository.findOneBy({
+      email: updateUserDto.email,
+      status: Status.ACTIVE,
+    });
+
+    if (anotherUserWithThisEmail && anotherUserWithThisEmail.id !== id) {
+      throw new ConflictException({
+        errorCode: '23505',
+        message: 'User with this email already exists',
+      });
+    }
+
     const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
