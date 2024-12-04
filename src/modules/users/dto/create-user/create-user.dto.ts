@@ -69,6 +69,12 @@ export class CreateUserDto {
   @IsNumber({}, { each: true })
   weekends: number[];
 
+  @ApiProperty({ description: 'Working hours of the user', required: false })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  workingHours: string;
+
   @ApiProperty({
     description: 'Language of the user',
     enum: Language,

@@ -34,4 +34,7 @@ export class GetCurrentUserResponseDto {
 
   @ApiProperty({ description: 'Weekends of the user', required: false })
   weekends: number[];
+
+  @ApiProperty({ description: 'Working hours of the user', required: false })
+  workingHours: string;
 }

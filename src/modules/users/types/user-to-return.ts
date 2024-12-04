@@ -44,6 +44,9 @@ export class UserToReturn {
   @ApiProperty({ description: 'Weekends of the user' })
   weekends: number[];
 
+  @ApiProperty({ description: 'Working hours of the user', required: false })
+  workingHours: string;
+
   @ApiProperty({ description: 'Created date and time of the user' })
   createdAt: Date;
 

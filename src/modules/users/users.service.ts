@@ -50,6 +50,7 @@ export class UsersService {
       language: user.language,
       holidays: user.holidays,
       weekends: user.weekends,
+      workingHours: user.workingHours,
     };
   }
 
@@ -135,6 +136,7 @@ export class UsersService {
       language,
       holidays,
       weekends,
+      workingHours,
     } = createUserDto;
 
     const user = new UserEntity();
@@ -149,6 +151,7 @@ export class UsersService {
     user.layoutTitle = layoutTitle;
     user.weekends = weekends;
     user.holidays = holidays;
+    user.workingHours = workingHours;
     user.language = language;
     user.role = role;
     user.status = Status.ACTIVE;

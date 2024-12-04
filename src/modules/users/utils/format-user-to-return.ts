@@ -16,6 +16,7 @@ export const formatUserToReturn = ({
   language,
   holidays,
   weekends,
+  workingHours,
 }: UserEntity): UserToReturn => ({
   id,
   email,
@@ -29,6 +30,7 @@ export const formatUserToReturn = ({
   language,
   holidays,
   weekends,
+  workingHours,
   createdAt: created_at,
   updatedAt: updated_at,
 });

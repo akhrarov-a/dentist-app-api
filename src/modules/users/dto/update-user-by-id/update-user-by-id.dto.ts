@@ -71,6 +71,12 @@ export class UpdateUserByIdDto {
   @IsNumber({}, { each: true })
   weekends: number[];
 
+  @ApiProperty({ description: 'Working hours of the user', required: false })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  workingHours: string;
+
   @ApiProperty({
     description: 'Role of the user',
     required: false,

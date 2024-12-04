@@ -48,6 +48,9 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'numeric', array: true, nullable: true })
   weekends: number[];
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  workingHours: string;
+
   @Column({ type: 'varchar', length: 255 })
   salt: string;
 

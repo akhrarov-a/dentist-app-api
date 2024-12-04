@@ -327,8 +327,12 @@ export class AppointmentsService {
       const _startTime = startTime || appointment.start_time;
       const _endTime = endTime || appointment.end_time;
 
-      // check for no another appointment in this time
-      await this.checkForOverlappingAppointments(user, _startTime, _endTime);
+      await this.checkForOverlappingAppointments(
+        user,
+        _startTime,
+        _endTime,
+        id,
+      );
 
       appointment.start_time = _startTime;
       appointment.end_time = _endTime;
@@ -394,6 +398,7 @@ export class AppointmentsService {
     user: UserEntity,
     startTime: Date,
     endTime: Date,
+    id?: number,
   ): Promise<void> {
     const query = this.appointmentRepository.createQueryBuilder('appointment');
 
@@ -404,7 +409,9 @@ export class AppointmentsService {
         start_time: startTime,
       });
 
-    if (!!(await query.getOne())) {
+    const one = await query.getOne();
+
+    if (!!one && one.id !== id) {
       throw new ConflictException(
         'You have already an appointment during this time',
       );
