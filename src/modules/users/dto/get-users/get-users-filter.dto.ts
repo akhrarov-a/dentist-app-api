@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { PaginationDto, UserRole } from '@core';
+import { PaginationDto, Status, UserRole } from '@core';
 
 export class GetUsersFilterDto extends PaginationDto {
   @ApiProperty({ description: 'Firstname of the user', required: false })
@@ -50,4 +50,13 @@ export class GetUsersFilterDto extends PaginationDto {
   @IsOptional()
   @IsIn([UserRole.ADMIN, UserRole.DENTIST])
   role: UserRole;
+
+  @ApiProperty({
+    description: 'Status of the user',
+    required: false,
+    enum: Status,
+  })
+  @IsOptional()
+  @IsIn([Status.ACTIVE, Status.DELETED])
+  status: Status;
 }

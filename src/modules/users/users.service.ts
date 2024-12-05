@@ -80,8 +80,8 @@ export class UsersService {
     Object.entries(filterDto).forEach(([key, value]) => {
       if (!value) return;
 
-      if (key === 'role') {
-        query.andWhere('user.role = :role', { role: value });
+      if (['role', 'status'].includes(key)) {
+        query.andWhere(`user.${key} = :${key}`, { [key]: value });
 
         return;
       }
