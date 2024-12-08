@@ -14,7 +14,7 @@ async function bootstrap(): Promise<void> {
   app.enableCors({ origin });
   logger.log(`Accepting requests from origin ${origin}`);
 
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('v1');
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Dentist App API')
