@@ -40,8 +40,8 @@ export class PatientsService {
     Object.entries(filterDto).forEach(([key, value]) => {
       if (!value) return;
 
-      query.andWhere(`patient.${key} LIKE :${key}`, {
-        [key]: `%${value}%`,
+      query.andWhere(`LOWER(patient.${key}) LIKE :${key}`, {
+        [key]: `%${value?.toLowerCase()}%`,
       });
     });
 
@@ -199,11 +199,11 @@ export class PatientsService {
     query
       .andWhere(`patient.user_id = :user_id`, { user_id: user.id })
       .andWhere(`patient.status = :status`, { status: Status.ACTIVE })
-      .andWhere(`patient.firstname LIKE :search`, {
-        search: `%${findPatientsByFirstnameOrLastnameDto.search}%`,
+      .andWhere(`LOWER(patient.firstname) LIKE :search`, {
+        search: `%${findPatientsByFirstnameOrLastnameDto.search?.toLowerCase()}%`,
       })
-      .orWhere(`patient.lastname LIKE :search`, {
-        search: `%${findPatientsByFirstnameOrLastnameDto.search}%`,
+      .orWhere(`LOWER(patient.lastname) LIKE :search`, {
+        search: `%${findPatientsByFirstnameOrLastnameDto.search?.toLowerCase()}%`,
       })
       .select(['patient.id', 'patient.firstname', 'patient.lastname']);
 

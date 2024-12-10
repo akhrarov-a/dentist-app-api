@@ -86,8 +86,8 @@ export class UsersService {
         return;
       }
 
-      query.andWhere(`user.${key} LIKE :${key}`, {
-        [key]: `%${value}%`,
+      query.andWhere(`LOWER(user.${key}) LIKE :${key}`, {
+        [key]: `%${value?.toLowerCase()}%`,
       });
     });
 

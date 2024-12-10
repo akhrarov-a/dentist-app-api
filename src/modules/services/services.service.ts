@@ -39,8 +39,8 @@ export class ServicesService {
     Object.entries(filterDto).forEach(([key, value]) => {
       if (!value) return;
 
-      query.andWhere(`service.${key} LIKE :${key}`, {
-        [key]: `%${value}%`,
+      query.andWhere(`LOWER(service.${key}) LIKE :${key}`, {
+        [key]: `%${value?.toLowerCase()}%`,
       });
     });
 
