@@ -201,12 +201,12 @@ export class PatientsService {
     query
       .andWhere(`patient.user_id = :user_id`, { user_id: user.id })
       .andWhere(`patient.status = :status`, { status: Status.ACTIVE })
-      .andWhere(`LOWER(patient.firstname) LIKE :search`, {
-        search: `%${findPatientsByFirstnameOrLastnameDto.search?.toLowerCase()}%`,
-      })
-      .orWhere(`LOWER(patient.lastname) LIKE :search`, {
-        search: `%${findPatientsByFirstnameOrLastnameDto.search?.toLowerCase()}%`,
-      })
+      .andWhere(
+        `(LOWER(patient.firstname) LIKE :search OR LOWER(patient.lastname) LIKE :search)`,
+        {
+          search: `%${findPatientsByFirstnameOrLastnameDto.search?.toLowerCase()}%`,
+        },
+      )
       .select(['patient.id', 'patient.firstname', 'patient.lastname']);
 
     return (await query.getMany()).slice(0, 20).map(formatPatientToReturn);
