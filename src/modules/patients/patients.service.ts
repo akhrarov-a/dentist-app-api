@@ -106,6 +106,7 @@ export class PatientsService {
   ): Promise<CreatePatientResponseDto> {
     const isPatientExistsWithThisPhone = await this.patientRepository.findOneBy(
       {
+        user: { id: user.id },
         phone: createPatientDto.phone,
         status: Status.ACTIVE,
       },
@@ -141,6 +142,7 @@ export class PatientsService {
     user: UserEntity,
   ): Promise<void> {
     const anotherPatientWithThisPhone = await this.patientRepository.findOneBy({
+      user: { id: user.id },
       phone: updatePatientByIdDto.phone,
       status: Status.ACTIVE,
     });
