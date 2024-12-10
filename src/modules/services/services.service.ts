@@ -119,6 +119,7 @@ export class ServicesService {
     user: UserEntity,
   ): Promise<CreateServiceResponseDto> {
     const isServiceExistsWithThisName = await this.serviceRepository.findOneBy({
+      user: { id: user.id },
       name: createServiceDto.name,
       status: Status.ACTIVE,
     });
@@ -149,6 +150,7 @@ export class ServicesService {
     user: UserEntity,
   ): Promise<void> {
     const anotherServiceWithThisName = await this.serviceRepository.findOneBy({
+      user: { id: user.id },
       name: updateServiceByIdDto.name,
       status: Status.ACTIVE,
     });
