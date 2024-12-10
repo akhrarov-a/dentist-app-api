@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { paginate } from '@core';
+import { paginate, Status } from '@core';
 import { UserEntity } from '@users/user.entity';
 import { PatientsService } from '@patients/patients.service';
 import { ServicesService } from '@services/services.service';
@@ -62,8 +62,16 @@ export class AppointmentsService {
     }
 
     query
-      .leftJoinAndSelect('appointment.patient', 'patient')
-      .leftJoinAndSelect('appointmentServices.service', 'service')
+      .innerJoinAndSelect(
+        'appointment.patient',
+        'patient',
+        `CAST(patient.status AS TEXT) = '${Status.ACTIVE}'`,
+      )
+      .innerJoinAndSelect(
+        'appointmentServices.service',
+        'service',
+        `CAST(service.status AS TEXT) = '${Status.ACTIVE}'`,
+      )
       .orderBy('appointment.start_time', 'DESC');
 
     if (service) {
@@ -150,12 +158,20 @@ export class AppointmentsService {
         start_time: startOfPeriod,
       })
       .andWhere('appointment.end_time <= :end_time', { end_time: endOfPeriod })
-      .leftJoinAndSelect('appointment.patient', 'patient')
+      .innerJoinAndSelect(
+        'appointment.patient',
+        'patient',
+        `CAST(patient.status AS TEXT) = '${Status.ACTIVE}'`,
+      )
       .leftJoinAndSelect(
         'appointment.appointmentServices',
         'appointmentServices',
       )
-      .leftJoinAndSelect('appointmentServices.service', 'service')
+      .innerJoinAndSelect(
+        'appointmentServices.service',
+        'service',
+        `CAST(service.status AS TEXT) = '${Status.ACTIVE}'`,
+      )
       .select([
         'appointment.id',
         'appointment.start_time',
@@ -404,6 +420,20 @@ export class AppointmentsService {
 
     query
       .where('appointment.user_id = :user_id', { user_id: user.id })
+      .innerJoinAndSelect(
+        'appointment.patient',
+        'patient',
+        `CAST(patient.status AS TEXT) = '${Status.ACTIVE}'`,
+      )
+      .leftJoinAndSelect(
+        'appointment.appointmentServices',
+        'appointmentServices',
+      )
+      .innerJoinAndSelect(
+        'appointmentServices.service',
+        'service',
+        `CAST(service.status AS TEXT) = '${Status.ACTIVE}'`,
+      )
       .andWhere('appointment.start_time < :end_time', { end_time: endTime })
       .andWhere('appointment.end_time > :start_time', {
         start_time: startTime,
