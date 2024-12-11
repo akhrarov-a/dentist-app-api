@@ -176,7 +176,7 @@ export class UsersService {
 
   async updateUserById(
     id: number,
-    updateUserDto: UpdateUserByIdDto,
+    { password, ...updateUserDto }: UpdateUserByIdDto,
   ): Promise<void> {
     const anotherUserWithThisEmail = await this.userRepository.findOneBy({
       email: updateUserDto.email,
@@ -194,6 +194,11 @@ export class UsersService {
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    if (password) {
+      user.salt = await bcrypt.genSalt();
+      user.password = await this.hashPassword(password, user.salt);
     }
 
     Object.keys(updateUserDto).map((key) => {

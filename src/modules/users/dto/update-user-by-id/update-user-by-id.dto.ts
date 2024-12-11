@@ -7,9 +7,12 @@ import {
   IsOptional,
   IsPhoneNumber,
   IsString,
+  Matches,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Language, UserRole } from '@core';
+import { Language, passwordRegex, UserRole } from '@core';
 
 export class UpdateUserByIdDto {
   @ApiProperty({ description: 'Firstname of the user', required: false })
@@ -43,6 +46,15 @@ export class UpdateUserByIdDto {
   @IsString()
   @IsEmail()
   email: string;
+
+  @ApiProperty({ description: 'Password of the user' })
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(8)
+  @MaxLength(20)
+  @Matches(passwordRegex, { message: 'Password is too weak' })
+  password: string;
 
   @ApiProperty({ description: 'Layout title of the user', required: false })
   @IsOptional()
