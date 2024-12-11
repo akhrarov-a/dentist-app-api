@@ -1,10 +1,20 @@
-import { Body, Controller, Get, Post, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+  ValidationPipe,
+} from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from '@users/utils';
+import { UserEntity } from '@users/user.entity';
 import { RefreshDto, SignInDto, SignInResponseDto } from './dto';
 import { AuthService } from './auth.service';
 
@@ -51,7 +61,8 @@ export class AuthController {
   })
   @ApiOkResponse({ description: 'Successfully logged out' })
   @Get('logout')
-  logout(): Promise<void> {
-    return this.authService.logout();
+  @UseGuards(AuthGuard())
+  logout(@GetUser() user: UserEntity): Promise<void> {
+    return this.authService.logout(user);
   }
 }

@@ -40,6 +40,12 @@ export class UserEntity extends BaseEntity {
   password: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
+  refreshToken: string;
+
+  @Column({ type: 'date', nullable: true })
+  refreshTokenExpiresAt: Date;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
   layoutTitle: string;
 
   @Column({ type: 'varchar', array: true, nullable: true })

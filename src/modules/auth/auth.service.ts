@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
+import { Status } from '@core';
 import { UserEntity } from '@users/user.entity';
 import { RefreshDto, SignInDto, SignInResponseDto } from './dto';
 import { JwtPayload } from './types';
@@ -15,44 +16,49 @@ export class AuthService {
   ) {}
 
   async signIn(authCredentialsDto: SignInDto): Promise<SignInResponseDto> {
-    const email = await this.validateUserPassword(authCredentialsDto);
+    const user = await this.validateUserPassword(authCredentialsDto);
 
-    if (!email) {
+    if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const accessToken = await this.generateAccessToken(email);
-    const refreshToken = await this.generateRefreshToken(email);
+    return this.generateAndSaveAndReturnTokens(user);
+  }
+
+  async refreshAccessToken(refreshDto: RefreshDto): Promise<SignInResponseDto> {
+    const user = await this.userRepository.findOne({
+      where: { refreshToken: refreshDto.refreshToken, status: Status.ACTIVE },
+    });
+
+    if (!user || user.refreshTokenExpiresAt < new Date()) {
+      throw new Error('Invalid or expired refresh token');
+    }
+
+    return this.generateAndSaveAndReturnTokens(user);
+  }
+
+  async logout(user: UserEntity): Promise<void> {
+    user.refreshToken = null;
+    user.refreshTokenExpiresAt = null;
+
+    await this.userRepository.save(user);
+  }
+
+  private async generateAndSaveAndReturnTokens(
+    user: UserEntity,
+  ): Promise<SignInResponseDto> {
+    const accessToken = await this.generateAccessToken(user.email);
+    const refreshToken = await this.generateRefreshToken(user.email);
+
+    user.refreshToken = refreshToken;
+    user.refreshTokenExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
+
+    await this.userRepository.save(user);
 
     return {
       accessToken,
       refreshToken,
     };
-  }
-
-  async refreshAccessToken(refreshDto: RefreshDto): Promise<SignInResponseDto> {
-    try {
-      const decoded = this.jwtService.verify(refreshDto.refreshToken);
-
-      const user = await this.userRepository.findOne({
-        where: { email: decoded.email },
-      });
-
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      return {
-        accessToken: await this.generateAccessToken(user.email),
-        refreshToken: refreshDto.refreshToken, // TODO: generate new refresh token, delete old one
-      };
-    } catch {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-  }
-
-  async logout(): Promise<void> {
-    // TODO: implement logout delete refresh token
   }
 
   private async generateAccessToken(email: string): Promise<string> {
@@ -73,13 +79,13 @@ export class AuthService {
 
   private async validateUserPassword(
     authCredentialsDto: SignInDto,
-  ): Promise<string> {
+  ): Promise<UserEntity> {
     const { email, password } = authCredentialsDto;
 
     const user = await this.userRepository.findOne({ where: { email } });
 
     if (user && (await user.validatePassword(password))) {
-      return user.email;
+      return user;
     } else {
       return null;
     }
