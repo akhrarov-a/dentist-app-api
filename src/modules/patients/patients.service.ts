@@ -12,7 +12,7 @@ import {
   CreatePatientDto,
   CreatePatientResponseDto,
   DeleteByIdsDto,
-  FindPatientsByFirstnameOrLastnameDto,
+  FindPatientsByFirstnameOrLastnameOrPhoneDto,
   GetPatientsFilterDto,
   GetPatientsResponseDto,
   PatientToReturnDto,
@@ -192,8 +192,8 @@ export class PatientsService {
     await this.patientRepository.save(patients);
   }
 
-  async findPatientsByFirstNameOrLastName(
-    findPatientsByFirstnameOrLastnameDto: FindPatientsByFirstnameOrLastnameDto,
+  async findPatientsByFirstNameOrLastNameOrPhone(
+    findPatientsByFirstnameOrLastnameOrPhoneDto: FindPatientsByFirstnameOrLastnameOrPhoneDto,
     user: UserEntity,
   ): Promise<PatientToReturnDto[]> {
     const query = this.patientRepository.createQueryBuilder('patient');
@@ -202,9 +202,9 @@ export class PatientsService {
       .andWhere(`patient.user_id = :user_id`, { user_id: user.id })
       .andWhere(`patient.status = :status`, { status: Status.ACTIVE })
       .andWhere(
-        `(LOWER(patient.firstname) LIKE :search OR LOWER(patient.lastname) LIKE :search)`,
+        `(LOWER(patient.firstname) LIKE :search OR LOWER(patient.lastname) LIKE :search OR patient.phone LIKE :search)`,
         {
-          search: `%${findPatientsByFirstnameOrLastnameDto.search?.toLowerCase()}%`,
+          search: `%${findPatientsByFirstnameOrLastnameOrPhoneDto.search?.toLowerCase()}%`,
         },
       )
       .select(['patient.id', 'patient.firstname', 'patient.lastname']);

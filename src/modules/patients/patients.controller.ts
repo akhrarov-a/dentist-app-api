@@ -20,7 +20,7 @@ import {
   CreatePatientDto,
   CreatePatientResponseDto,
   DeleteByIdsDto,
-  FindPatientsByFirstnameOrLastnameDto,
+  FindPatientsByFirstnameOrLastnameOrPhoneDto,
   GetPatientsFilterDto,
   GetPatientsResponseDto,
   PatientToReturnDto,
@@ -141,14 +141,14 @@ export class PatientsController {
     description: 'Successfully get',
     type: [PatientToReturnDto],
   })
-  @Get('/by/firstname-or-lastname')
-  findPatientsByFirstnameOrLastname(
+  @Get('/by/firstname-or-lastname-or-phone')
+  findPatientsByFirstnameOrLastnameOrPhone(
     @Query(ValidationPipe)
-    findPatientsByFirstnameOrLastnameDto: FindPatientsByFirstnameOrLastnameDto,
+    findPatientsByFirstnameOrLastnameOrPhoneDto: FindPatientsByFirstnameOrLastnameOrPhoneDto,
     @GetUser() user: UserEntity,
   ): Promise<PatientToReturnDto[]> {
-    return this.patientsService.findPatientsByFirstNameOrLastName(
-      findPatientsByFirstnameOrLastnameDto,
+    return this.patientsService.findPatientsByFirstNameOrLastNameOrPhone(
+      findPatientsByFirstnameOrLastnameOrPhoneDto,
       user,
     );
   }
